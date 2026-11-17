@@ -1,0 +1,4354 @@
+{
+  "schema_version": 1,
+  "phase": "LOCAL_CONFIGURATION_CI_VERIFIED",
+  "project": {
+    "name": "EKS Blueprints DevSecOps demonstration",
+    "repository": "https://github.com/aws-ia/terraform-aws-eks-blueprints",
+    "pattern": "patterns/fully-private-cluster",
+    "upstream_ref": "fc40e64615785b3dc4db88e57c45a6687ca026b5",
+    "verified_commit": "fc40e64615785b3dc4db88e57c45a6687ca026b5",
+    "reviewed_on": "2026-11-17",
+    "stack": [
+      "Terraform",
+      "GitHub Actions",
+      "Docker",
+      "Amazon ECR",
+      "Amazon EKS",
+      "Kubernetes"
+    ],
+    "scope": "The EKS API, managed nodes, VPC and private service endpoints described by the selected pattern, plus the proposed delivery and application controls for one demo workload."
+  },
+  "basis_legend": {
+    "SOURCE_CONTRACT": "The upstream pattern or a reviewed dependency describes the behavior. The resolved plan and runtime measurements are separate evidence.",
+    "PROPOSED_POLICY": "A rule for the demonstration. Confirm the policy and actual implementation before making it a required check."
+  },
+  "evidence_rule": "Record which boundary a case actually reaches, the normal control, the negative case, and an observation independent of the code under test. Configuration, policy fixtures and deployed behavior have separate results. An unknown required value calls for review.",
+  "verification_status": {
+    "source_review": "Pinned upstream and 130 parsed source units linked to review decisions",
+    "scenarios": "41/41 PASS",
+    "terraform_plan": "Terraform mock apply PASS; 106 evaluated resources",
+    "ci_and_runtime": "Local CI PASS; hosted CI PENDING; deployed AWS/Kubernetes PENDING"
+  },
+  "sources": {
+    "blueprint_code": "https://github.com/aws-ia/terraform-aws-eks-blueprints/blob/fc40e64615785b3dc4db88e57c45a6687ca026b5/patterns/fully-private-cluster/main.tf",
+    "blueprint_doc": "https://aws-ia.github.io/terraform-aws-eks-blueprints/patterns/fully-private-cluster/",
+    "eks_module_endpoint_defaults": "https://github.com/terraform-aws-modules/terraform-aws-eks/blob/v20.37.2/variables.tf#L87-L96",
+    "vpc_module_default_vpc": "https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/v5.21.0/main.tf#L1142-L1153",
+    "vpc_module_endpoints": "https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/v5.21.0/modules/vpc-endpoints/main.tf",
+    "aws_eks_private_clusters": "https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html",
+    "aws_eks_endpoint": "https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html",
+    "aws_eks_versions": "https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html",
+    "aws_ecr_endpoints": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html",
+    "github_aws_oidc": "https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws",
+    "aws_eks_irsa": "https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html",
+    "aws_subnet_public_ipv4": "https://docs.aws.amazon.com/vpc/latest/userguide/subnet-public-ip.html"
+  },
+  "source_inventory": [
+    {
+      "id": "SRC-EKS-API",
+      "file": "patterns/fully-private-cluster/main.tf",
+      "block": "module.eks",
+      "anchors": [
+        "cluster_version",
+        "vpc_id",
+        "subnet_ids"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01"
+      ],
+      "decision": "The module supplies the endpoint defaults. Inspect the effective resource in the plan."
+    },
+    {
+      "id": "SRC-EKS-NODES",
+      "file": "patterns/fully-private-cluster/main.tf",
+      "block": "module.eks",
+      "anchors": [
+        "subnet_ids",
+        "eks_managed_node_groups"
+      ],
+      "matrix_ids": [
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01"
+      ],
+      "decision": "Managed node placement affects both network isolation and image pulls."
+    },
+    {
+      "id": "SRC-VPC-ROUTING",
+      "file": "patterns/fully-private-cluster/main.tf",
+      "block": "module.vpc",
+      "anchors": [
+        "private_subnets",
+        "enable_nat_gateway",
+        "private_subnet_tags"
+      ],
+      "matrix_ids": [
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "NETWORK-01"
+      ],
+      "decision": "Track node subnet routing and the subnet tags used to discover internal load balancers."
+    },
+    {
+      "id": "SRC-VPC-OWNERSHIP",
+      "file": "patterns/fully-private-cluster/main.tf",
+      "block": "module.vpc",
+      "anchors": [
+        "manage_default_vpc"
+      ],
+      "matrix_ids": [
+        "VPC-SCOPE-01"
+      ],
+      "decision": "The upstream input is enabled. The demo proposes leaving the account's default VPC outside its Terraform ownership."
+    },
+    {
+      "id": "SRC-ENDPOINT-PULL",
+      "file": "patterns/fully-private-cluster/main.tf",
+      "block": "module.vpc_endpoints",
+      "anchors": [
+        "ecr.api",
+        "ecr.dkr",
+        "service_type",
+        "route_table_ids",
+        "private_dns_enabled"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01"
+      ],
+      "decision": "The ECR interface endpoints and S3 route table associations jointly support image pulls. Interface endpoints also inherit the endpoint security group."
+    },
+    {
+      "id": "SRC-ENDPOINT-INGRESS",
+      "file": "patterns/fully-private-cluster/main.tf",
+      "block": "module.vpc_endpoints",
+      "anchors": [
+        "security_group_rules",
+        "ingress_https",
+        "cidr_blocks"
+      ],
+      "matrix_ids": [
+        "ENDPOINT-ACCESS-01"
+      ],
+      "decision": "Read the effective protocol, ports, sources and group attachment after module expansion."
+    },
+    {
+      "id": "SRC-ENDPOINT-IDENTITY",
+      "file": "patterns/fully-private-cluster/main.tf",
+      "block": "module.vpc_endpoints",
+      "anchors": [
+        "sts",
+        "private_dns_enabled"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ],
+      "decision": "The STS endpoint provides a network path. Workload trust and permissions are defined by the future demo resources."
+    },
+    {
+      "id": "SRC-ADDONS",
+      "file": "patterns/fully-private-cluster/main.tf",
+      "block": "module.eks",
+      "anchors": [
+        "cluster_addons",
+        "coredns",
+        "kube-proxy",
+        "vpc-cni"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01"
+      ],
+      "decision": "The executable platform oracle checks the cluster version and required add-on assignments."
+    }
+  ],
+  "matrices": [
+    {
+      "id": "PLATFORM-BASELINE-01",
+      "boundary": "Terraform cluster configuration to the EKS add-on platform",
+      "basis": "SOURCE_CONTRACT",
+      "source_refs": [
+        "SRC-ADDONS"
+      ],
+      "documentation": [
+        "blueprint_code",
+        "aws_eks_versions"
+      ],
+      "obligation": "The cluster uses the reviewed Kubernetes version and declares CoreDNS, kube-proxy and VPC CNI for the same cluster.",
+      "evidence": {
+        "ci": "Inspect resolved aws_eks_cluster and aws_eks_addon resources from Terraform evaluation. Compare the version against the separate demo policy."
+      },
+      "variants": [
+        {
+          "id": "PLATFORM-BASELINE-01-READY-P",
+          "kind": "positive",
+          "case": "The reviewed version and three required add-ons are present for the demo cluster.",
+          "expected": "PASS"
+        },
+        {
+          "id": "PLATFORM-BASELINE-01-ADDON-N",
+          "kind": "negative",
+          "case": "A controlled resource fixture omits CoreDNS.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "PLATFORM-BASELINE-01-VERSION-N",
+          "kind": "negative",
+          "case": "A controlled resource fixture selects a version outside the reviewed baseline.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "PLATFORM-BASELINE-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE"
+        ]
+      },
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_addons"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CLUSTER-ACCESS-01",
+      "boundary": "Deployment network and EKS nodes to the Kubernetes API",
+      "basis": "SOURCE_CONTRACT",
+      "source_refs": [
+        "SRC-EKS-API"
+      ],
+      "documentation": [
+        "blueprint_doc",
+        "eks_module_endpoint_defaults",
+        "aws_eks_endpoint"
+      ],
+      "obligation": "The Kubernetes API has private endpoint access enabled and public endpoint access disabled.",
+      "evidence": {
+        "ci": "Compare the resolved aws_eks_cluster VPC settings with the expected private and public flags.",
+        "runtime": "Compare the deployed EKS endpoint settings with the plan and observe a successful authenticated read from the approved private network."
+      },
+      "variants": [
+        {
+          "id": "CLUSTER-ACCESS-01-PRIVATE-P",
+          "kind": "positive",
+          "case": "Both resolved endpoint flags match the intended private configuration.",
+          "expected": "PASS"
+        },
+        {
+          "id": "CLUSTER-ACCESS-01-PUBLIC-N",
+          "kind": "negative",
+          "case": "An offline plan fixture declares a public endpoint.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "CLUSTER-ACCESS-01-NO-PRIVATE-N",
+          "kind": "negative",
+          "case": "An offline plan fixture has no private endpoint.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "CLUSTER-ACCESS-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE"
+        ]
+      },
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_endpoint_private_access"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_endpoint_public_access"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.enable_nat_gateway"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnet_tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnets"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NODE-NETWORK-01",
+      "boundary": "EKS managed nodes to VPC subnets and external networks",
+      "basis": "SOURCE_CONTRACT",
+      "source_refs": [
+        "SRC-EKS-NODES",
+        "SRC-VPC-ROUTING"
+      ],
+      "documentation": [
+        "blueprint_doc",
+        "aws_eks_private_clusters",
+        "aws_subnet_public_ipv4"
+      ],
+      "obligation": "Managed nodes use the pattern's private subnets and have no route to the internet or public IP assignment.",
+      "evidence": {
+        "ci": "Resolve node subnet placement and effective route table associations. For freshly mocked custom subnets only, resolve an omitted optional public IPv4 flag through the documented AWS creation default recorded in policy.json. Deployed values require direct observation.",
+        "runtime": "Compare actual node subnet IDs, ENI addresses and effective route tables with the approved topology."
+      },
+      "variants": [
+        {
+          "id": "NODE-NETWORK-01-PRIVATE-P",
+          "kind": "positive",
+          "case": "Every node subnet resolves to an approved private subnet with private routes.",
+          "expected": "PASS"
+        },
+        {
+          "id": "NODE-NETWORK-01-ROUTE-N",
+          "kind": "negative",
+          "case": "An offline topology fixture includes an internet egress route for a node subnet.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "NODE-NETWORK-01-SUBNET-N",
+          "kind": "negative",
+          "case": "An offline topology fixture places a node group in a subnet that assigns public addresses.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "NODE-NETWORK-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE"
+        ]
+      },
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.eks_managed_node_groups"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.enable_nat_gateway"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnet_tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnets"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ECR-PRIVATE-PULL-01",
+      "boundary": "Private EKS nodes to ECR registry services and S3 image layers",
+      "basis": "SOURCE_CONTRACT",
+      "source_refs": [
+        "SRC-EKS-NODES",
+        "SRC-VPC-ROUTING",
+        "SRC-ENDPOINT-PULL"
+      ],
+      "documentation": [
+        "blueprint_doc",
+        "aws_eks_private_clusters",
+        "aws_ecr_endpoints"
+      ],
+      "obligation": "The node VPC has both ECR interface endpoints with private DNS and an S3 gateway endpoint associated with every node subnet route table.",
+      "evidence": {
+        "ci": "Compare endpoint type, VPC, DNS and route table associations in the Terraform plan with the managed node topology.",
+        "runtime": "A fresh test node pulls a demo image digest from private ECR. Confirm the pull in Kubernetes events and confirm the node had no cached copy or internet route."
+      },
+      "variants": [
+        {
+          "id": "ECR-PRIVATE-PULL-01-PATH-P",
+          "kind": "positive",
+          "case": "ECR API, ECR registry and S3 associations cover the node subnets.",
+          "expected": "PASS"
+        },
+        {
+          "id": "ECR-PRIVATE-PULL-01-DNS-N",
+          "kind": "negative",
+          "case": "An offline plan fixture lacks private DNS for one ECR interface endpoint.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "ECR-PRIVATE-PULL-01-S3-N",
+          "kind": "negative",
+          "case": "An offline plan fixture leaves a node route table outside the S3 gateway associations.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "ECR-PRIVATE-PULL-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE"
+        ]
+      },
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.eks_managed_node_groups"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.enable_nat_gateway"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnet_tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnets"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.create_security_group"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.endpoints"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.security_group_description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.security_group_name_prefix"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.security_group_rules"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ENDPOINT-ACCESS-01",
+      "boundary": "VPC clients to private AWS interface endpoints",
+      "basis": "SOURCE_CONTRACT",
+      "source_refs": [
+        "SRC-ENDPOINT-INGRESS",
+        "SRC-ENDPOINT-PULL"
+      ],
+      "documentation": [
+        "vpc_module_endpoints"
+      ],
+      "obligation": "The security groups attached to the interface endpoints admit HTTPS from the pattern's VPC CIDR and limit their inbound rules to that contract.",
+      "evidence": {
+        "ci": "Compare every effective endpoint group attachment and its resolved ingress permissions with the VPC CIDR resolved from the same plan.",
+        "runtime": "Compare actual endpoint attachments and ingress permissions returned by AWS with the approved configuration."
+      },
+      "variants": [
+        {
+          "id": "ENDPOINT-ACCESS-01-HTTPS-P",
+          "kind": "positive",
+          "case": "The effective ingress admits TCP 443 from the declared VPC range.",
+          "expected": "PASS"
+        },
+        {
+          "id": "ENDPOINT-ACCESS-01-SOURCE-N",
+          "kind": "negative",
+          "case": "An offline plan fixture includes an ingress source outside that range.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "ENDPOINT-ACCESS-01-ATTACHMENT-N",
+          "kind": "negative",
+          "case": "An offline plan fixture attaches a second group with ingress beyond the endpoint contract.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "ENDPOINT-ACCESS-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE"
+        ]
+      },
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.enable_nat_gateway"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnet_tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnets"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.create_security_group"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.endpoints"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.security_group_description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.security_group_name_prefix"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.security_group_rules"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "VPC-SCOPE-01",
+      "boundary": "Terraform ownership of the demo VPC to the account's default VPC",
+      "basis": "PROPOSED_POLICY",
+      "source_refs": [
+        "SRC-VPC-OWNERSHIP"
+      ],
+      "documentation": [
+        "vpc_module_default_vpc"
+      ],
+      "obligation": "The demonstration manages its own VPC. The account's default VPC stays outside the demo's managed resources.",
+      "evidence": {
+        "ci": "Check whether the Terraform configuration or state would manage an aws_default_vpc resource, including when the proposed action is a no-op.",
+        "runtime": "Review the demo state and the owning account's VPC inventory before treating the deployment scope as confirmed."
+      },
+      "variants": [
+        {
+          "id": "VPC-SCOPE-01-DEMO-P",
+          "kind": "positive",
+          "case": "The plan and demo state include only the dedicated demo VPC.",
+          "expected": "PASS"
+        },
+        {
+          "id": "VPC-SCOPE-01-DEFAULT-N",
+          "kind": "negative",
+          "case": "An offline fixture places the existing default VPC under the demo's management.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "VPC-SCOPE-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE"
+        ]
+      },
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.manage_default_vpc"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CI-DEPLOY-01",
+      "boundary": "GitHub pull requests and release jobs to AWS deployment identity",
+      "basis": "PROPOSED_POLICY",
+      "source_refs": [],
+      "documentation": [
+        "github_aws_oidc",
+        "aws_eks_endpoint"
+      ],
+      "obligation": "PR validation has no AWS deployment credentials. Publication and deployment require the matrix gate and a manual main-branch release. Both AWS role trusts bind the exact repository and main ref.",
+      "evidence": {
+        "ci": "Check the workflow and environment rules together with the IAM trust conditions using synthetic job contexts.",
+        "runtime": "Use the Actions job record and an AWS role session audit record from the isolated demo environment to confirm the authorized release."
+      },
+      "variants": [
+        {
+          "id": "CI-DEPLOY-01-RELEASE-P",
+          "kind": "positive",
+          "case": "An approved release on an allowed ref meets the environment and role trust rules.",
+          "expected": "ALLOW"
+        },
+        {
+          "id": "CI-DEPLOY-01-PR-N",
+          "kind": "negative",
+          "case": "A PR validation job context is evaluated for deployment access.",
+          "expected": "DENY"
+        },
+        {
+          "id": "CI-DEPLOY-01-IDENTITY-N",
+          "kind": "negative",
+          "case": "A synthetic job context belongs to a different repository or environment.",
+          "expected": "DENY"
+        },
+        {
+          "id": "CI-DEPLOY-01-REF-N",
+          "kind": "negative",
+          "case": "A synthetic release job has an unapproved ref despite targeting the named environment.",
+          "expected": "DENY"
+        }
+      ],
+      "binding": {
+        "oracle": "CI-DEPLOY-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE",
+          "DECLARED_POLICY_EVALUATION"
+        ]
+      },
+      "implementation_inputs": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/release.yml",
+        "patterns/fully-private-cluster/delivery.tf"
+      ],
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.env"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.gate"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.publish"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.deploy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.demo_object_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.registry_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.release_subject"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.repository_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.1.release_trust"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "output.delivery_contract.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.kubernetes_groups"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.principal_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.type"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_openid_connect_provider.github.0.client_id_list"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_openid_connect_provider.github.0.url"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.deployer.0.assume_role_policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.deployer.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.publisher.0.assume_role_policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.publisher.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.deployer.0.policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.deployer.0.role"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.publisher.0.policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.publisher.0.role"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "variable.github_repository.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "variable.github_repository.0.type"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "IMAGE-BUILD-01",
+      "boundary": "Docker build inputs to exported application image",
+      "basis": "PROPOSED_POLICY",
+      "source_refs": [],
+      "obligation": "The published image omits build credentials from image configuration, history and every exported layer.",
+      "evidence": {
+        "ci": "Inspect the exported single-platform image archive, configuration and history for a deliberately issued synthetic marker. Include a clean-image control and fixture artifacts that contain the marker."
+      },
+      "variants": [
+        {
+          "id": "IMAGE-BUILD-01-CLEAN-P",
+          "kind": "positive",
+          "case": "The synthetic value was available during the build and is absent from the final artifact.",
+          "expected": "PASS"
+        },
+        {
+          "id": "IMAGE-BUILD-01-METADATA-N",
+          "kind": "negative",
+          "case": "An offline image fixture contains the synthetic marker in its metadata.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "IMAGE-BUILD-01-LAYER-N",
+          "kind": "negative",
+          "case": "An offline image fixture contains the synthetic marker in one exported layer.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "IMAGE-BUILD-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "LOCAL_OCI_ARTIFACT"
+        ]
+      },
+      "implementation_inputs": [
+        "Application Dockerfile",
+        "Docker build workflow"
+      ],
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": "app/.dockerignore",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "app/Dockerfile",
+          "symbols": [
+            "instruction.0.FROM"
+          ]
+        },
+        {
+          "path": "app/Dockerfile",
+          "symbols": [
+            "instruction.1.WORKDIR"
+          ]
+        },
+        {
+          "path": "app/Dockerfile",
+          "symbols": [
+            "instruction.2.COPY"
+          ]
+        },
+        {
+          "path": "app/Dockerfile",
+          "symbols": [
+            "instruction.3.USER"
+          ]
+        },
+        {
+          "path": "app/Dockerfile",
+          "symbols": [
+            "instruction.4.EXPOSE"
+          ]
+        },
+        {
+          "path": "app/Dockerfile",
+          "symbols": [
+            "instruction.5.CMD"
+          ]
+        },
+        {
+          "path": "app/Dockerfile",
+          "symbols": [
+            "dockerfile"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "REGISTRY-IAM-01",
+      "boundary": "Build, deploy and node identities to the ECR repository",
+      "basis": "PROPOSED_POLICY",
+      "source_refs": [],
+      "documentation": [
+        "aws_ecr_endpoints"
+      ],
+      "obligation": "The approved build identity publishes to the assigned repository. Nodes can pull the assigned image. Publishing is outside the node and deployment roles.",
+      "evidence": {
+        "ci": "Evaluate the role and repository policies against a small table of registry operations and repository identities.",
+        "runtime": "Correlate successful authorized image publication and the fresh private pull with the actual AWS identities and repository."
+      },
+      "variants": [
+        {
+          "id": "REGISTRY-IAM-01-PUBLISH-P",
+          "kind": "positive",
+          "case": "The build role has publish access to the demo repository.",
+          "expected": "ALLOW"
+        },
+        {
+          "id": "REGISTRY-IAM-01-PULL-P",
+          "kind": "positive",
+          "case": "The node role has pull access to the demo repository.",
+          "expected": "ALLOW"
+        },
+        {
+          "id": "REGISTRY-IAM-01-ROLE-N",
+          "kind": "negative",
+          "case": "Evaluate publication permission for the node and deployment roles against synthetic policy inputs.",
+          "expected": "DENY"
+        },
+        {
+          "id": "REGISTRY-IAM-01-REPO-N",
+          "kind": "negative",
+          "case": "Evaluate the build role's publish permission for an unrelated repository in policy fixtures.",
+          "expected": "DENY"
+        }
+      ],
+      "binding": {
+        "oracle": "REGISTRY-IAM-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE",
+          "DECLARED_POLICY_EVALUATION"
+        ]
+      },
+      "implementation_inputs": [
+        "ECR demo repository",
+        "image publication IAM role",
+        "EKS node IAM permissions",
+        "deployment IAM role"
+      ],
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.env"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.gate"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.publish"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.deploy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.demo_object_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.registry_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.repository_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "output.delivery_contract.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_ecr_repository.demo.0.image_scanning_configuration"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_ecr_repository.demo.0.image_tag_mutability"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_ecr_repository.demo.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_ecr_repository.demo.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.kubernetes_groups"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.principal_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.type"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.deployer.0.assume_role_policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.deployer.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.publisher.0.assume_role_policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.publisher.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.deployer.0.policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.deployer.0.role"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.publisher.0.policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.publisher.0.role"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.eks_managed_node_groups"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "IMAGE-01",
+      "boundary": "Approved Docker build to ECR artifact to Kubernetes deployment",
+      "basis": "PROPOSED_POLICY",
+      "source_refs": [],
+      "obligation": "The Deployment references the same repository and digest recorded by the approved release build.",
+      "evidence": {
+        "ci": "Compare the trusted release record, ECR image digest and rendered Deployment image independently. Use a single-platform demo image so the manifest digest comparison is unambiguous.",
+        "runtime": "Record the running workload's image metadata and the approved descriptor it resolves to."
+      },
+      "variants": [
+        {
+          "id": "IMAGE-01-DIGEST-P",
+          "kind": "positive",
+          "case": "The recorded digest, registry descriptor and Deployment reference agree.",
+          "expected": "PASS"
+        },
+        {
+          "id": "IMAGE-01-MISMATCH-N",
+          "kind": "negative",
+          "case": "The rendered Deployment fixture references a different digest or repository.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "IMAGE-01-TAG-N",
+          "kind": "negative",
+          "case": "The rendered Deployment fixture references an image by tag alone.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "IMAGE-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE",
+          "LOCAL_OCI_ARTIFACT",
+          "RENDERED_KUBERNETES_CONFIGURATION"
+        ]
+      },
+      "implementation_inputs": [
+        "Approved release metadata from the trusted build job",
+        "ECR image metadata",
+        "rendered Kubernetes Deployment"
+      ],
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.env"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.gate"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.publish"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.deploy"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.spec"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.demo_object_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.registry_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.repository_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "output.delivery_contract.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_ecr_repository.demo.0.image_scanning_configuration"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_ecr_repository.demo.0.image_tag_mutability"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_ecr_repository.demo.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_ecr_repository.demo.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DEPLOY-RBAC-01",
+      "boundary": "Approved deploy identity to Kubernetes deployment permissions",
+      "basis": "PROPOSED_POLICY",
+      "source_refs": [],
+      "documentation": [
+        "aws_eks_endpoint"
+      ],
+      "obligation": "The deploy identity can perform the intended release actions only in the demo namespace. Cluster administration is outside its role.",
+      "evidence": {
+        "ci": "Compare the resolved EKS access entry and Kubernetes grants with the intended verbs, resources and namespace.",
+        "runtime": "Record Kubernetes authorization decisions for scoped and out-of-scope actions in a test cluster."
+      },
+      "variants": [
+        {
+          "id": "DEPLOY-RBAC-01-NAMESPACE-P",
+          "kind": "positive",
+          "case": "The identity can update its demo Deployment.",
+          "expected": "ALLOW"
+        },
+        {
+          "id": "DEPLOY-RBAC-01-OTHER-NAMESPACE-N",
+          "kind": "negative",
+          "case": "Evaluate update permission for a synthetic Deployment in another test namespace.",
+          "expected": "DENY"
+        },
+        {
+          "id": "DEPLOY-RBAC-01-CLUSTER-N",
+          "kind": "negative",
+          "case": "Evaluate permission for a cluster-scoped administrative action.",
+          "expected": "DENY"
+        }
+      ],
+      "binding": {
+        "oracle": "DEPLOY-RBAC-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE",
+          "DECLARED_POLICY_EVALUATION"
+        ]
+      },
+      "implementation_inputs": [
+        "EKS access entry for the demo deploy role",
+        "Kubernetes Role and RoleBinding",
+        "demo namespace"
+      ],
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.env"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.gate"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.publish"
+          ]
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "symbols": [
+            "workflow.jobs.deploy"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Namespace.matrix-demo.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Namespace.matrix-demo.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Namespace.matrix-demo.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.rules"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.subjects"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.roleRef"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.demo_object_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.namespace"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.registry_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.repository_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.service_account"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "output.delivery_contract.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.kubernetes_groups"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.principal_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_eks_access_entry.deployer.0.type"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.deployer.0.assume_role_policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.deployer.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.deployer.0.policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.deployer.0.role"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WORKLOAD-IAM-01",
+      "boundary": "Kubernetes service account to workload role to the demo AWS resource",
+      "basis": "PROPOSED_POLICY",
+      "source_refs": [
+        "SRC-ENDPOINT-IDENTITY"
+      ],
+      "documentation": [
+        "aws_eks_private_clusters",
+        "aws_eks_irsa"
+      ],
+      "obligation": "The named service account obtains the dedicated read-only role and can read its assigned demo object. Other service accounts and unrelated objects are outside that grant. Demo object storage retains all four S3 public access restrictions. The private workload selects regional STS and has a private STS network endpoint.",
+      "evidence": {
+        "ci": "Evaluate the workload identity mapping, trust and permission policy using declared and unrelated synthetic identities and object references.",
+        "runtime": "Confirm the role identity and read result in the test environment using only synthetic objects."
+      },
+      "variants": [
+        {
+          "id": "WORKLOAD-IAM-01-READ-P",
+          "kind": "positive",
+          "case": "The intended service account reads its assigned object with the workload role.",
+          "expected": "ALLOW"
+        },
+        {
+          "id": "WORKLOAD-IAM-01-ACCOUNT-N",
+          "kind": "negative",
+          "case": "Evaluate trust for a different service account in the fixture.",
+          "expected": "DENY"
+        },
+        {
+          "id": "WORKLOAD-IAM-01-OBJECT-N",
+          "kind": "negative",
+          "case": "Evaluate read permission for a different synthetic object in the fixture.",
+          "expected": "DENY"
+        },
+        {
+          "id": "WORKLOAD-IAM-01-PUBLIC-STORAGE-N",
+          "kind": "negative",
+          "case": "A controlled resource fixture removes a public access restriction from demo object storage.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "WORKLOAD-IAM-01-STS-N",
+          "kind": "negative",
+          "case": "A controlled resource fixture omits the regional STS endpoint required by the private workload.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "WORKLOAD-IAM-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE",
+          "DECLARED_POLICY_EVALUATION"
+        ]
+      },
+      "implementation_inputs": [
+        "Kubernetes demo ServiceAccount",
+        "IRSA trust policy",
+        "scoped read permission for a synthetic S3 object",
+        "regional STS access"
+      ],
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Namespace.matrix-demo.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Namespace.matrix-demo.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Namespace.matrix-demo.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "ServiceAccount.matrix-reader.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "ServiceAccount.matrix-reader.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "ServiceAccount.matrix-reader.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.rules"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.subjects"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.roleRef"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.spec"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.demo_object_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.namespace"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.registry_arn"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.repository_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.service_account"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.2.workload_trust"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "output.delivery_contract.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.workload.0.assume_role_policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role.workload.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.workload.0.policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_iam_role_policy.workload.0.role"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_s3_bucket.demo.0.bucket_prefix"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_s3_bucket.demo.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_s3_bucket_public_access_block.demo.0.block_public_acls"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_s3_bucket_public_access_block.demo.0.block_public_policy"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_s3_bucket_public_access_block.demo.0.bucket"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_s3_bucket_public_access_block.demo.0.ignore_public_acls"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_s3_bucket_public_access_block.demo.0.restrict_public_buckets"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.create_security_group"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.endpoints"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.security_group_description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.security_group_name_prefix"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.security_group_rules"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc_endpoints.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NETWORK-01",
+      "boundary": "Client traffic to the demo Kubernetes Service",
+      "basis": "PROPOSED_POLICY",
+      "source_refs": [
+        "SRC-VPC-ROUTING"
+      ],
+      "documentation": [
+        "blueprint_doc"
+      ],
+      "obligation": "The demo application exposes a cluster-internal Service and no public application entry point.",
+      "evidence": {
+        "ci": "Inspect rendered Service and routing objects for reachable entry points targeting the demo workload.",
+        "runtime": "Observe an approved in-cluster health request and check the deployed service and load balancer inventory for public routes to the workload."
+      },
+      "variants": [
+        {
+          "id": "NETWORK-01-INTERNAL-P",
+          "kind": "positive",
+          "case": "The Service resolves inside the cluster and has only the intended internal entry point.",
+          "expected": "PASS"
+        },
+        {
+          "id": "NETWORK-01-PUBLIC-N",
+          "kind": "negative",
+          "case": "An offline manifest fixture declares a public route to the demo Service.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "NETWORK-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE"
+        ]
+      },
+      "implementation_inputs": [
+        "Rendered demo Service",
+        "Ingress and Gateway configuration for the demo workload",
+        "cloud load balancer inventory"
+      ],
+      "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": [
+            "workflow.jobs.matrix"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/matrix-sensitivity.yml",
+          "symbols": [
+            "workflow.jobs.sensitivity"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Namespace.matrix-demo.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Namespace.matrix-demo.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Namespace.matrix-demo.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "Role.matrix-deployer.rules"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.subjects"
+          ]
+        },
+        {
+          "path": "app/kubernetes/bootstrap.yaml",
+          "symbols": [
+            "RoleBinding.matrix-deployer.roleRef"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Deployment.matrix-demo.spec"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Service.matrix-demo.apiVersion"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Service.matrix-demo.kind"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Service.matrix-demo.metadata"
+          ]
+        },
+        {
+          "path": "app/kubernetes/workload.yaml",
+          "symbols": [
+            "Service.matrix-demo.spec"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.namespace"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "locals.0.service_account"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "data.aws_availability_zones.available.0.filter"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "locals.0.vpc_cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.cluster_name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.subnet_ids"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.eks.0.vpc_id"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.azs"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.cidr"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.enable_nat_gateway"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.name"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnet_tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.private_subnets"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.source"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.tags"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "module.vpc.0.version"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/main.tf",
+          "symbols": [
+            "provider.aws.0.region"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.description"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/outputs.tf",
+          "symbols": [
+            "output.configure_kubectl.0.value"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_providers"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/versions.tf",
+          "symbols": [
+            "terraform.0.required_version"
+          ]
+        }
+      ]
+    }
+  ],
+  "workflow": {
+    "authoring": [
+      "Read the scoped source and follow dependency references to the effective resource.",
+      "Write the obligation, positive and negative scenarios, and observable evidence.",
+      "Walk from each security-relevant source block and field back to its matrix or review decision.",
+      "Add executable checks and bind each scenario to its matrix ID in the CI implementation phase."
+    ],
+    "pull_request": [
+      "Validate the catalog, source inventory and scenario bindings.",
+      "Map the changed files and the changed blocks or fields inside them to impacted matrices.",
+      "Review a new or unclassified security-relevant change and link it to an existing matrix, add a matrix, or record a justified decision.",
+      "Run the applicable scenarios for the change and publish outcomes with their evidence level."
+    ],
+    "manual_sensitivity": "Run on demand for a matrix ID or the whole catalog. Start from a passing control fixture. Change one policy-relevant value in an offline copy and require the same oracle to reject the changed fixture."
+  },
+  "next_stage_inputs": [
+    "Publish the project to the intended private repository and run GitHub Actions",
+    "Configure the real GitHub repository and AWS deployment identities before a manual release",
+    "Collect independent deployed AWS and Kubernetes observations"
+  ]
+}

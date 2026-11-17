@@ -1,0 +1,54 @@
+name: Boundary Matrix Gate
+on:
+  pull_request: {}
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+  workflow_call: {}
+permissions:
+  contents: read
+jobs:
+  matrix:
+    name: Boundary Matrix Gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: '1.13.5'
+          terraform_wrapper: false
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Install pinned parsers
+        run: npm ci --ignore-scripts
+      - name: Validate catalog and scenario bindings
+        run: npm run matrix:validate
+      - name: Check gate and source review integrity
+        run: npm test
+      - name: Review source changes, select matrices and run scenarios
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] || [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            node security/matrix_ci.mjs run --full
+          else
+            node security/matrix_ci.mjs run --base "$BASE_SHA"
+          fi
+      - name: Upload matrix evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: boundary-matrix-evidence
+          path: |
+            artifacts/*.json
+            artifacts/*.jsonl
+            artifacts/*.md
+          if-no-files-found: warn

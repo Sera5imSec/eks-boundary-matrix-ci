@@ -1,0 +1,21 @@
+{
+  "name": "eks-boundary-matrix-ci",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test security/test_*.mjs",
+    "matrix:validate": "node security/matrix_ci.mjs validate",
+    "matrix:ci": "node security/matrix_ci.mjs run --full",
+    "matrix:sensitivity": "node security/matrix_sensitivity.mjs --matrix all"
+  },
+  "dependencies": {
+    "dockerfile-ast": "0.7.1",
+    "hcl2-parser": "1.0.3",
+    "tar-stream": "3.1.7",
+    "yaml": "2.9.1"
+  }
+}

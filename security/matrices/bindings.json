@@ -1,0 +1,1691 @@
+{
+  "schema_version": 1,
+  "runner": "security/matrix_runtime.mjs",
+  "sensitivity_runner": "security/matrix_sensitivity.mjs",
+  "bound_matrices": [
+    "PLATFORM-BASELINE-01",
+    "CLUSTER-ACCESS-01",
+    "NODE-NETWORK-01",
+    "ECR-PRIVATE-PULL-01",
+    "ENDPOINT-ACCESS-01",
+    "VPC-SCOPE-01",
+    "CI-DEPLOY-01",
+    "IMAGE-BUILD-01",
+    "REGISTRY-IAM-01",
+    "IMAGE-01",
+    "DEPLOY-RBAC-01",
+    "WORKLOAD-IAM-01",
+    "NETWORK-01"
+  ],
+  "scenario_to_matrix": {
+    "PLATFORM-BASELINE-01-READY-P": "PLATFORM-BASELINE-01",
+    "PLATFORM-BASELINE-01-ADDON-N": "PLATFORM-BASELINE-01",
+    "PLATFORM-BASELINE-01-VERSION-N": "PLATFORM-BASELINE-01",
+    "CLUSTER-ACCESS-01-PRIVATE-P": "CLUSTER-ACCESS-01",
+    "CLUSTER-ACCESS-01-PUBLIC-N": "CLUSTER-ACCESS-01",
+    "CLUSTER-ACCESS-01-NO-PRIVATE-N": "CLUSTER-ACCESS-01",
+    "NODE-NETWORK-01-PRIVATE-P": "NODE-NETWORK-01",
+    "NODE-NETWORK-01-ROUTE-N": "NODE-NETWORK-01",
+    "NODE-NETWORK-01-SUBNET-N": "NODE-NETWORK-01",
+    "ECR-PRIVATE-PULL-01-PATH-P": "ECR-PRIVATE-PULL-01",
+    "ECR-PRIVATE-PULL-01-DNS-N": "ECR-PRIVATE-PULL-01",
+    "ECR-PRIVATE-PULL-01-S3-N": "ECR-PRIVATE-PULL-01",
+    "ENDPOINT-ACCESS-01-HTTPS-P": "ENDPOINT-ACCESS-01",
+    "ENDPOINT-ACCESS-01-SOURCE-N": "ENDPOINT-ACCESS-01",
+    "ENDPOINT-ACCESS-01-ATTACHMENT-N": "ENDPOINT-ACCESS-01",
+    "VPC-SCOPE-01-DEMO-P": "VPC-SCOPE-01",
+    "VPC-SCOPE-01-DEFAULT-N": "VPC-SCOPE-01",
+    "CI-DEPLOY-01-RELEASE-P": "CI-DEPLOY-01",
+    "CI-DEPLOY-01-PR-N": "CI-DEPLOY-01",
+    "CI-DEPLOY-01-IDENTITY-N": "CI-DEPLOY-01",
+    "CI-DEPLOY-01-REF-N": "CI-DEPLOY-01",
+    "IMAGE-BUILD-01-CLEAN-P": "IMAGE-BUILD-01",
+    "IMAGE-BUILD-01-METADATA-N": "IMAGE-BUILD-01",
+    "IMAGE-BUILD-01-LAYER-N": "IMAGE-BUILD-01",
+    "REGISTRY-IAM-01-PUBLISH-P": "REGISTRY-IAM-01",
+    "REGISTRY-IAM-01-PULL-P": "REGISTRY-IAM-01",
+    "REGISTRY-IAM-01-ROLE-N": "REGISTRY-IAM-01",
+    "REGISTRY-IAM-01-REPO-N": "REGISTRY-IAM-01",
+    "IMAGE-01-DIGEST-P": "IMAGE-01",
+    "IMAGE-01-MISMATCH-N": "IMAGE-01",
+    "IMAGE-01-TAG-N": "IMAGE-01",
+    "DEPLOY-RBAC-01-NAMESPACE-P": "DEPLOY-RBAC-01",
+    "DEPLOY-RBAC-01-OTHER-NAMESPACE-N": "DEPLOY-RBAC-01",
+    "DEPLOY-RBAC-01-CLUSTER-N": "DEPLOY-RBAC-01",
+    "WORKLOAD-IAM-01-READ-P": "WORKLOAD-IAM-01",
+    "WORKLOAD-IAM-01-ACCOUNT-N": "WORKLOAD-IAM-01",
+    "WORKLOAD-IAM-01-OBJECT-N": "WORKLOAD-IAM-01",
+    "WORKLOAD-IAM-01-PUBLIC-STORAGE-N": "WORKLOAD-IAM-01",
+    "WORKLOAD-IAM-01-STS-N": "WORKLOAD-IAM-01",
+    "NETWORK-01-INTERNAL-P": "NETWORK-01",
+    "NETWORK-01-PUBLIC-N": "NETWORK-01"
+  },
+  "sources": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "symbol_prefixes": [
+        "workflow.name"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "IMAGE-BUILD-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "symbol_prefixes": [
+        "workflow.on"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "IMAGE-BUILD-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "symbol_prefixes": [
+        "workflow.permissions"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "IMAGE-BUILD-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "symbol_prefixes": [
+        "workflow.jobs.matrix"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "IMAGE-BUILD-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/matrix-sensitivity.yml",
+      "symbol_prefixes": [
+        "workflow.name"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "IMAGE-BUILD-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/matrix-sensitivity.yml",
+      "symbol_prefixes": [
+        "workflow.on"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "IMAGE-BUILD-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/matrix-sensitivity.yml",
+      "symbol_prefixes": [
+        "workflow.permissions"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "IMAGE-BUILD-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/matrix-sensitivity.yml",
+      "symbol_prefixes": [
+        "workflow.jobs.sensitivity"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "IMAGE-BUILD-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "symbol_prefixes": [
+        "workflow.name"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "symbol_prefixes": [
+        "workflow.on"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "symbol_prefixes": [
+        "workflow.permissions"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "symbol_prefixes": [
+        "workflow.env"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "symbol_prefixes": [
+        "workflow.jobs.gate"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "symbol_prefixes": [
+        "workflow.jobs.publish"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "symbol_prefixes": [
+        "workflow.jobs.deploy"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "app/.dockerignore",
+      "symbol_prefixes": [
+        "file"
+      ],
+      "matrix_ids": [
+        "IMAGE-BUILD-01"
+      ]
+    },
+    {
+      "path": "app/Dockerfile",
+      "symbol_prefixes": [
+        "instruction.0.FROM"
+      ],
+      "matrix_ids": [
+        "IMAGE-BUILD-01"
+      ]
+    },
+    {
+      "path": "app/Dockerfile",
+      "symbol_prefixes": [
+        "instruction.1.WORKDIR"
+      ],
+      "matrix_ids": [
+        "IMAGE-BUILD-01"
+      ]
+    },
+    {
+      "path": "app/Dockerfile",
+      "symbol_prefixes": [
+        "instruction.2.COPY"
+      ],
+      "matrix_ids": [
+        "IMAGE-BUILD-01"
+      ]
+    },
+    {
+      "path": "app/Dockerfile",
+      "symbol_prefixes": [
+        "instruction.3.USER"
+      ],
+      "matrix_ids": [
+        "IMAGE-BUILD-01"
+      ]
+    },
+    {
+      "path": "app/Dockerfile",
+      "symbol_prefixes": [
+        "instruction.4.EXPOSE"
+      ],
+      "matrix_ids": [
+        "IMAGE-BUILD-01"
+      ]
+    },
+    {
+      "path": "app/Dockerfile",
+      "symbol_prefixes": [
+        "instruction.5.CMD"
+      ],
+      "matrix_ids": [
+        "IMAGE-BUILD-01"
+      ]
+    },
+    {
+      "path": "app/Dockerfile",
+      "symbol_prefixes": [
+        "dockerfile"
+      ],
+      "matrix_ids": [
+        "IMAGE-BUILD-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "Namespace.matrix-demo.apiVersion"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "Namespace.matrix-demo.kind"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "Namespace.matrix-demo.metadata"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "ServiceAccount.matrix-reader.apiVersion"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "ServiceAccount.matrix-reader.kind"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "ServiceAccount.matrix-reader.metadata"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "Role.matrix-deployer.apiVersion"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "Role.matrix-deployer.kind"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "Role.matrix-deployer.metadata"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "Role.matrix-deployer.rules"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "RoleBinding.matrix-deployer.apiVersion"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "RoleBinding.matrix-deployer.kind"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "RoleBinding.matrix-deployer.metadata"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "RoleBinding.matrix-deployer.subjects"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/bootstrap.yaml",
+      "symbol_prefixes": [
+        "RoleBinding.matrix-deployer.roleRef"
+      ],
+      "matrix_ids": [
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/workload.yaml",
+      "symbol_prefixes": [
+        "Deployment.matrix-demo.apiVersion"
+      ],
+      "matrix_ids": [
+        "IMAGE-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/workload.yaml",
+      "symbol_prefixes": [
+        "Deployment.matrix-demo.kind"
+      ],
+      "matrix_ids": [
+        "IMAGE-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/workload.yaml",
+      "symbol_prefixes": [
+        "Deployment.matrix-demo.metadata"
+      ],
+      "matrix_ids": [
+        "IMAGE-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/workload.yaml",
+      "symbol_prefixes": [
+        "Deployment.matrix-demo.spec"
+      ],
+      "matrix_ids": [
+        "IMAGE-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/workload.yaml",
+      "symbol_prefixes": [
+        "Service.matrix-demo.apiVersion"
+      ],
+      "matrix_ids": [
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/workload.yaml",
+      "symbol_prefixes": [
+        "Service.matrix-demo.kind"
+      ],
+      "matrix_ids": [
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/workload.yaml",
+      "symbol_prefixes": [
+        "Service.matrix-demo.metadata"
+      ],
+      "matrix_ids": [
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/kubernetes/workload.yaml",
+      "symbol_prefixes": [
+        "Service.matrix-demo.spec"
+      ],
+      "matrix_ids": [
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "app/server.mjs",
+      "symbol_prefixes": [
+        "file"
+      ],
+      "matrix_ids": []
+    },
+    {
+      "path": "patterns/fully-private-cluster/.terraform.lock.hcl",
+      "symbol_prefixes": [
+        "file"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "locals.0.demo_object_arn"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "WORKLOAD-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "locals.0.namespace"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01",
+        "DEPLOY-RBAC-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "locals.0.registry_arn"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "WORKLOAD-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "locals.0.release_subject"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "locals.0.repository_name"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "WORKLOAD-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "locals.0.service_account"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01",
+        "DEPLOY-RBAC-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "locals.1.release_trust"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "locals.2.workload_trust"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "output.delivery_contract.0.value"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "WORKLOAD-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_ecr_repository.demo.0.image_scanning_configuration"
+      ],
+      "matrix_ids": [
+        "REGISTRY-IAM-01",
+        "IMAGE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_ecr_repository.demo.0.image_tag_mutability"
+      ],
+      "matrix_ids": [
+        "REGISTRY-IAM-01",
+        "IMAGE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_ecr_repository.demo.0.name"
+      ],
+      "matrix_ids": [
+        "REGISTRY-IAM-01",
+        "IMAGE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_ecr_repository.demo.0.tags"
+      ],
+      "matrix_ids": [
+        "REGISTRY-IAM-01",
+        "IMAGE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_eks_access_entry.deployer.0.cluster_name"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_eks_access_entry.deployer.0.kubernetes_groups"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_eks_access_entry.deployer.0.principal_arn"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_eks_access_entry.deployer.0.type"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_openid_connect_provider.github.0.client_id_list"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_openid_connect_provider.github.0.url"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role.deployer.0.assume_role_policy"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role.deployer.0.name"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role.publisher.0.assume_role_policy"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role.publisher.0.name"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role.workload.0.assume_role_policy"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role.workload.0.name"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role_policy.deployer.0.policy"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role_policy.deployer.0.role"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "DEPLOY-RBAC-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role_policy.publisher.0.policy"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role_policy.publisher.0.role"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role_policy.workload.0.policy"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_iam_role_policy.workload.0.role"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket.demo.0.bucket_prefix"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket.demo.0.tags"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.demo.0.block_public_acls"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.demo.0.block_public_policy"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.demo.0.bucket"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.demo.0.ignore_public_acls"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.demo.0.restrict_public_buckets"
+      ],
+      "matrix_ids": [
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "variable.github_repository.0.description"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "variable.github_repository.0.type"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "data.aws_availability_zones.available.0.filter"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "locals.0.azs"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "locals.0.name"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "locals.0.region"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "locals.0.tags"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "locals.0.vpc_cidr"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.cluster_addons"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.cluster_endpoint_private_access"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.cluster_endpoint_public_access"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.cluster_name"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.cluster_version"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.eks_managed_node_groups"
+      ],
+      "matrix_ids": [
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "REGISTRY-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.source"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.subnet_ids"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.tags"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.version"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.eks.0.vpc_id"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.azs"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.cidr"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.enable_nat_gateway"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.manage_default_vpc"
+      ],
+      "matrix_ids": [
+        "VPC-SCOPE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.name"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.private_subnet_tags"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.private_subnets"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.source"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.tags"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc.0.version"
+      ],
+      "matrix_ids": [
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc_endpoints.0.create_security_group"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc_endpoints.0.endpoints"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc_endpoints.0.security_group_description"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc_endpoints.0.security_group_name_prefix"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc_endpoints.0.security_group_rules"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc_endpoints.0.source"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc_endpoints.0.tags"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc_endpoints.0.version"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "module.vpc_endpoints.0.vpc_id"
+      ],
+      "matrix_ids": [
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "WORKLOAD-IAM-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol_prefixes": [
+        "provider.aws.0.region"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/outputs.tf",
+      "symbol_prefixes": [
+        "output.configure_kubectl.0.description"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/outputs.tf",
+      "symbol_prefixes": [
+        "output.configure_kubectl.0.value"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+      "symbol_prefixes": [
+        "file"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/versions.tf",
+      "symbol_prefixes": [
+        "terraform.0.required_providers"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/versions.tf",
+      "symbol_prefixes": [
+        "terraform.0.required_version"
+      ],
+      "matrix_ids": [
+        "PLATFORM-BASELINE-01",
+        "CLUSTER-ACCESS-01",
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "ENDPOINT-ACCESS-01",
+        "VPC-SCOPE-01",
+        "CI-DEPLOY-01",
+        "REGISTRY-IAM-01",
+        "IMAGE-01",
+        "DEPLOY-RBAC-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ]
+    }
+  ]
+}

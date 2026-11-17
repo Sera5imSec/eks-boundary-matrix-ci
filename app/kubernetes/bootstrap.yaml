@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: matrix-demo
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: matrix-reader
+  namespace: matrix-demo
+  annotations:
+    eks.amazonaws.com/role-arn: REPLACE_WITH_WORKLOAD_ROLE
+    eks.amazonaws.com/sts-regional-endpoints: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: matrix-deployer
+  namespace: matrix-demo
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: matrix-deployer
+  namespace: matrix-demo
+subjects:
+  - kind: Group
+    name: matrix-deployer
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: matrix-deployer
+  apiGroup: rbac.authorization.k8s.io

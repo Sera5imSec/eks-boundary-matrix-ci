@@ -1,0 +1,129 @@
+# EKS Boundary Matrix CI
+
+This project adapts the Fully Private Cluster pattern from Amazon EKS Blueprints
+for Terraform. The source is pinned to upstream commit
+`fc40e64615785b3dc4db88e57c45a6687ca026b5`.
+
+The demonstration connects Terraform, a Docker image, Amazon ECR, EKS/Kubernetes
+and GitHub Actions through one catalog with 13 matrices and 41 scenarios.
+The catalog covers private cluster networking, registry and workload permissions,
+deployment scope, image identity, build artifact contents and the cluster baseline.
+
+The upstream Apache 2.0 license is retained. Local changes make the API endpoint
+private explicitly, leave the account's default VPC unmanaged, pin module and
+provider versions, and add the demo delivery identities and workload.
+
+## Development workflow
+
+Read the scoped source and dependency behavior, describe the rule and its
+observable result, write the positive and negative scenarios, then walk backwards
+from each source unit to its matrix and coverage decision. Add executable scenario
+bindings after that review.
+
+The source inventory parses Terraform fields inside named blocks, individual
+Kubernetes objects, workflow jobs and Docker instructions. New source files,
+new fields inside existing files and changed fingerprints require a coverage
+decision. Each decision names the applicable matrices and scenario IDs, or
+explains why the change has no security effect within this demonstration.
+
+A decision can reuse an existing rule, add a scenario or add a matrix. The review
+checks that a decision claiming a new matrix or scenario actually introduces one
+relative to the base commit.
+
+## Boundary Matrix Gate
+
+Pull request or push → validate catalog and bindings → inventory source changes
+→ review coverage decisions → select affected matrices → evaluate Terraform with
+mocked providers and build the local image → run bound scenarios → publish the
+report and enforce its result.
+
+The selection is based on changed parsed source units. An endpoint access flag
+selects its cluster-access matrix. Changes to gate implementation or an
+unclassified source unit select the full catalog. A documentation-only change
+selects zero matrices. The coverage decision file alone does not expand the
+selection.
+
+The required result includes the current-source fingerprints, one result for
+every selected matrix, all bound scenario results and a passing normal control.
+Missing evidence, unknown values and unresolved review decisions fail the gate.
+The report retains the distinction between a failed rule and evidence that needs
+review.
+
+The Terraform run uses `terraform test` with mocked AWS, TLS, time, null and
+cloud-init providers. Its evaluated resources are configuration evidence.
+Policy fixtures test the implemented policy subset. Unsupported IAM constructs
+request review. The image scanner reads an actual single-platform OCI archive,
+verifies blob digests and checks its configuration, history and exported layers
+for a synthetic build marker.
+
+The VPC module leaves the optional public IPv4 assignment flag unset on new
+custom subnets. The configuration oracle uses AWS's documented creation default
+for that specific mocked case and records its source in the evidence. A missing
+value in deployed state still requests review.
+
+AWS API behavior, ECR publication and deployed Kubernetes observations remain
+separate pending evidence until a test cloud environment is configured.
+
+## Local checks
+
+Use Linux with Node 22, Terraform 1.13.5 and a running Docker daemon with Buildx.
+
+```sh
+npm ci --ignore-scripts
+npm run matrix:validate
+npm test
+terraform -chdir=patterns/fully-private-cluster init -backend=false -input=false
+terraform -chdir=patterns/fully-private-cluster validate
+npm run matrix:ci
+```
+
+For a change against a known Git base commit, run the gate with `--base`.
+
+```sh
+node security/matrix_ci.mjs run --base BASE_COMMIT_SHA
+```
+
+Inspect `artifacts/change-impact.json` and `artifacts/boundary-review.json` for
+the exact unit fingerprint and candidate matrix IDs. Record the decision in
+`security/matrices/code_decisions.json` and add scenario bindings when needed.
+Coverage decisions are review inputs; they do not repair a failing rule.
+
+The report and evidence are written under `artifacts/`. The normal CI job
+uploads JSON and Markdown evidence through GitHub Actions.
+
+## Manual sensitivity
+
+The sensitivity workflow has a manual trigger. It builds a passing control from
+the current source, changes one controlled offline fixture, then requires the
+same oracle to reject it. Each result identifies that fixture.
+
+```sh
+node security/prepare_evidence.mjs
+node security/matrix_sensitivity.mjs --matrix all
+node security/matrix_sensitivity.mjs --matrix CLUSTER-ACCESS-01
+```
+
+A scenario ID resolves to its parent matrix, and comma-separated matrix IDs are
+accepted. `DETECTED` is a successful sensitivity result. `SURVIVED`,
+`CONTROL_FAILED` and `ERROR` fail the sensitivity job. An unknown input ID
+produces an input error and exit code 2.
+
+## Manual release setup
+
+The release workflow requires a successful matrix gate and a manual dispatch on
+main. It publishes a single-platform image to the demo ECR repository and sends
+its digest to the deployment job.
+
+Configure the intended GitHub repository in Terraform before applying the
+infrastructure. The sample policy and mocked configuration use the synthetic
+repository `matrix-fixture/eks-boundary-matrix-ci`. Update the policy and test
+context together when adopting a real repository.
+
+An administrator must bootstrap the demo namespace, RoleBinding, ServiceAccount
+and initial Deployment, replacing the workload role and image placeholders.
+The release job then needs the repository variables `AWS_PUBLISH_ROLE`,
+`AWS_DEPLOY_ROLE` and `EKS_CLUSTER_NAME`, and a private runner with the
+`matrix-private-deploy` label, AWS CLI and kubectl.
+
+The runtime identity has read permission for one synthetic object. The demo
+HTTP server returns a health response; it performs no AWS API requests.

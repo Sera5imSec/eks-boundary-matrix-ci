@@ -1,0 +1,33 @@
+{
+  "repository": "https://github.com/aws-ia/terraform-aws-eks-blueprints",
+  "commit": "fc40e64615785b3dc4db88e57c45a6687ca026b5",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "sha256": "5e06334348ebd7986fe4be9331e894646d10ea540133229f162e9b4fdfd3677e"
+    },
+    {
+      "path": "patterns/fully-private-cluster/outputs.tf",
+      "sha256": "f7625ac911af0a7bb0405fc9946f63fe5414e19521975ab981dc280eff1bfb8a"
+    },
+    {
+      "path": "patterns/fully-private-cluster/versions.tf",
+      "sha256": "758000b69802918b748efe434d87b8bb11819be060fb9bdb0e01dbdb14d4f0bd"
+    },
+    {
+      "path": "patterns/fully-private-cluster/README.md",
+      "sha256": "5285761b07b9a1065abc92da1943b6d756ff9d54f7ab31a496c843a1241da03c"
+    }
+  ],
+  "local_adaptations": [
+    "Explicit private API settings",
+    "Disable default VPC management",
+    "Pin module versions",
+    "Select a supported Kubernetes version",
+    "Add delivery identities and demo workload"
+  ]
+}

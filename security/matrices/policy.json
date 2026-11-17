@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "github_repository": "matrix-fixture/eks-boundary-matrix-ci",
+  "release_ref": "refs/heads/main",
+  "namespace": "matrix-demo",
+  "service_account": "matrix-reader",
+  "kubernetes_versions": ["1.35"],
+  "provider_contracts": {
+    "new_custom_subnet_public_ipv4_default": false,
+    "source": "https://docs.aws.amazon.com/vpc/latest/userguide/subnet-public-ip.html"
+  },
+  "ci_evidence": ["TERRAFORM_MOCK_STATE", "LOCAL_OCI_ARTIFACT", "CONTROLLED_POLICY_FIXTURE"],
+  "manual_sensitivity": true,
+  "meaning": "These checks evaluate the demo configuration with synthetic identities. A deployed environment has separate AWS and Kubernetes observations."
+}
