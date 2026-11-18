@@ -43,7 +43,7 @@ export function renderedDocuments(root, policy, terraform, record) {
   return rendered;
 }
 
-export async function prepareEvidence({ root = ROOT, terraform = 'terraform', imageFile = null, marker = null, skipTerraform = false, skipImage = false } = {}) {
+export async function prepareEvidence({ root = ROOT, terraform = 'terraform', imageFile = null, marker = null, skipTerraform = false, skipImage = false, imageNoCache = false } = {}) {
   const artifactDirectory = path.join(root, 'artifacts');
   fs.mkdirSync(artifactDirectory, { recursive: true });
   const logFile = path.join(artifactDirectory, 'terraform-test.jsonl');
@@ -89,7 +89,7 @@ export async function prepareEvidence({ root = ROOT, terraform = 'terraform', im
       const markerFile = path.join(artifactDirectory, 'build-marker.txt');
       imageFile = path.join(artifactDirectory, 'image.oci.tar');
       fs.writeFileSync(markerFile, synthetic);
-      execFileSync('docker', ['buildx', 'build', '--platform=linux/amd64', '--provenance=false', '--sbom=false',
+      execFileSync('docker', ['buildx', 'build', ...(imageNoCache ? ['--no-cache'] : []), '--platform=linux/amd64', '--provenance=false', '--sbom=false',
         '--secret', 'id=matrix_marker,src=' + markerFile,
         '--output', 'type=oci,dest=' + imageFile, path.join(root, 'app')], {
         stdio: 'inherit', timeout: 600_000

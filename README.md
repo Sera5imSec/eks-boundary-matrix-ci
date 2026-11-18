@@ -93,20 +93,35 @@ uploads JSON and Markdown evidence through GitHub Actions.
 
 ## Manual sensitivity
 
-The sensitivity workflow has a manual trigger. It builds a passing control from
-the current source, changes one controlled offline fixture, then requires the
-same oracle to reject it. Each result identifies that fixture.
+The separate sensitivity workflow runs only through `workflow_dispatch`. PR,
+push and scheduled CI do not launch this source-mutation suite. The command also
+rejects automatic GitHub Actions event contexts. Its source-mutating self-tests
+also run in this separate manual workflow, outside the normal PR test command.
+
+Each of the 13 matrices has one representative source edit. The runner builds a
+passing control from the current source, copies source files to a disposable
+directory, changes exactly one file, and prepares evidence again. Terraform edits
+rerun formatting, initialization, validation and mocked evaluation. Kubernetes
+and workflow edits are parsed and rendered again. The Dockerfile edit rebuilds
+an actual OCI image without the build cache and scans its layers for a synthetic
+secret. Unchanged Terraform/image evidence can be reused only with matching
+source provenance. Provider binaries are shared as a cache; source and state are
+isolated. The ordinary CI's controlled policy fixtures remain separate checks.
 
 ```sh
-node security/prepare_evidence.mjs
 node security/matrix_sensitivity.mjs --matrix all
 node security/matrix_sensitivity.mjs --matrix CLUSTER-ACCESS-01
 ```
 
 A scenario ID resolves to its parent matrix, and comma-separated matrix IDs are
-accepted. `DETECTED` is a successful sensitivity result. `SURVIVED`,
-`CONTROL_FAILED` and `ERROR` fail the sensitivity job. An unknown input ID
-produces an input error and exit code 2.
+accepted. `DETECTED` requires a passing control, successful preparation and a
+`FAIL` from the same matrix oracle. `SURVIVED`, `CONTROL_FAILED`, `ERROR`, stale
+evidence and a changed original checkout fail the job. A build error or `REVIEW`
+is never counted as a detection. An unknown input ID produces an input error and
+exit code 2. Temporary directories are removed; source hashes, edits, per-matrix
+observations and preparation evidence remain under `artifacts/source-sensitivity/`.
+This checks one source edit per matrix, rather than all 41 scenario variants.
+AWS and Kubernetes are not deployed by this workflow.
 
 ## Manual release setup
 

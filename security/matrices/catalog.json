@@ -4344,7 +4344,7 @@
       "Review a new or unclassified security-relevant change and link it to an existing matrix, add a matrix, or record a justified decision.",
       "Run the applicable scenarios for the change and publish outcomes with their evidence level."
     ],
-    "manual_sensitivity": "Run on demand for a matrix ID or the whole catalog. Start from a passing control fixture. Change one policy-relevant value in an offline copy and require the same oracle to reject the changed fixture."
+    "manual_sensitivity": "Manual-only source mutation for one matrix ID or the whole catalog. Build a passing current-source control, change one source file in a disposable copy, re-evaluate the changed Terraform/image/configuration domain, and require the same matrix oracle to return FAIL. Preparation errors and REVIEW are not detections. Preserve original source hashes and per-matrix evidence."
   },
   "next_stage_inputs": [
     "Publish the project to the intended private repository and run GitHub Actions",
