@@ -114,10 +114,10 @@ The release workflow requires a successful matrix gate and a manual dispatch on
 main. It publishes a single-platform image to the demo ECR repository and sends
 its digest to the deployment job.
 
-Configure the intended GitHub repository in Terraform before applying the
-infrastructure. The sample policy and mocked configuration use the synthetic
-repository `matrix-fixture/eks-boundary-matrix-ci`. Update the policy and test
-context together when adopting a real repository.
+The policy and mocked configuration are bound to the private repository
+`Sera5imSec/eks-boundary-matrix-ci`. Set the same `github_repository` Terraform
+input before applying the infrastructure. When adopting another repository,
+update the policy and test context together.
 
 An administrator must bootstrap the demo namespace, RoleBinding, ServiceAccount
 and initial Deployment, replacing the workload role and image placeholders.

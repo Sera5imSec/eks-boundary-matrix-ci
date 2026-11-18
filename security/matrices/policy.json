@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "github_repository": "matrix-fixture/eks-boundary-matrix-ci",
+  "github_repository": "Sera5imSec/eks-boundary-matrix-ci",
   "release_ref": "refs/heads/main",
   "namespace": "matrix-demo",
   "service_account": "matrix-reader",

@@ -170,6 +170,6 @@ override_data {
 run "matrix_configuration" {
   command = apply
   variables {
-    github_repository = "matrix-fixture/eks-boundary-matrix-ci"
+    github_repository = "Sera5imSec/eks-boundary-matrix-ci"
   }
 }

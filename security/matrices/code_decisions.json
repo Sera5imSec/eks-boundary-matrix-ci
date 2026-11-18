@@ -3768,7 +3768,7 @@
     {
       "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
       "symbol": "file",
-      "fingerprint": "f46df8c26a5a39e0fce503f4d43446d9e0ea3e05bb4291e683419b89b95deb64",
+      "fingerprint": "40ba378c0e5d38fd5ef37fd4bb30337be7f1d6b24859ffe7393d51dd7d57836e",
       "decision": "existing_rule",
       "matrix_ids": [
         "PLATFORM-BASELINE-01",
