@@ -1,5 +1,9 @@
 # EKS Boundary Matrix CI
 
+**[Workflow and matrix structure in Russian](docs/WORKFLOW.ru.md)** — development,
+source coverage review, matrix selection, normal CI, separate manual source
+mutations and release setup.
+
 This project adapts the Fully Private Cluster pattern from Amazon EKS Blueprints
 for Terraform. The source is pinned to upstream commit
 `fc40e64615785b3dc4db88e57c45a6687ca026b5`.
