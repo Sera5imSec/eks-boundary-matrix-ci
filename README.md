@@ -9,7 +9,7 @@ for Terraform. The source is pinned to upstream commit
 `fc40e64615785b3dc4db88e57c45a6687ca026b5`.
 
 The demonstration connects Terraform, a Docker image, Amazon ECR, EKS/Kubernetes
-and GitHub Actions through one catalog with 13 matrices and 41 scenarios.
+and GitHub Actions through one catalog with 13 matrices and 42 scenarios.
 The catalog covers private cluster networking, registry and workload permissions,
 deployment scope, image identity, build artifact contents and the cluster baseline.
 
@@ -128,6 +128,11 @@ This checks one source edit per matrix, rather than all 41 scenario variants.
 AWS and Kubernetes are not deployed by this workflow.
 
 ## Manual release setup
+
+**[Local CD](docs/LOCAL-CD.md)** builds and HTTP-tests a main-branch image after
+successful normal CI, then a local pull agent installs it on the loopback-only
+Docker stand. The actual installation is recorded in GitHub Deployments under
+`local-cd`. This local target is separate from the AWS release below.
 
 The release workflow requires a successful matrix gate and a manual dispatch on
 main. It publishes a single-platform image to the demo ECR repository and sends

@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { evaluate } from './matrix_oracles.mjs';
+import fs from 'node:fs';
+import YAML from 'yaml';
 
 function workloadFixture() {
   const issuer = 'oidc.eks.us-west-2.amazonaws.com/id/FIXTURE';
@@ -78,6 +80,7 @@ test('workflow scalar forms are recognized and write-all cannot pass the PR toke
     ] },
     workflows: {
       '.github/workflows/ci.yml': { on: 'pull_request', permissions: 'read-all', jobs: { check: {} } },
+      '.github/workflows/cd.yml': YAML.parse(fs.readFileSync(new URL('../.github/workflows/cd.yml', import.meta.url), 'utf8')),
       '.github/workflows/release.yml': { on: 'workflow_dispatch', jobs: {
         gate: { uses: './.github/workflows/ci.yml' },
         publish: { if: condition, needs: 'gate' }, deploy: { if: condition }

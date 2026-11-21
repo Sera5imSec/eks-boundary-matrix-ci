@@ -2,6 +2,177 @@
   "schema_version": 1,
   "decisions": [
     {
+      "path": "delivery/check_install.py",
+      "symbol": "file",
+      "fingerprint": "c0893e34efccf624fed28f94e3c62dafb3271eee82f6ee9600c2ce1daab76733",
+      "decision": "add_variant",
+      "matrix_ids": ["CI-DEPLOY-01"],
+      "variant_ids": ["CI-DEPLOY-01-LOCAL-N", "CI-DEPLOY-01-RELEASE-P"],
+      "reason": "Explicit local Docker integration checks cover installation, update, artifact identity rejection and restoration after a failed promotion; they run separately from ordinary PR checks."
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "symbol": "workflow.jobs.delivery-policy",
+      "fingerprint": "beb94de6ee591dfca917ef7f226e281cdea56243cc5c2625df2b98b693564e81",
+      "decision": "add_variant",
+      "matrix_ids": ["CI-DEPLOY-01"],
+      "variant_ids": ["CI-DEPLOY-01-LOCAL-N", "CI-DEPLOY-01-RELEASE-P"],
+      "reason": "PR and main CI run the admission tests for the new exact-revision local delivery boundary."
+    },
+    {
+      "path": ".github/workflows/cd.yml",
+      "symbol": "workflow.name",
+      "fingerprint": "77df05cb68fa4248d2daff3d218c116e65b848777c02c3f4e7e84c37e3958319",
+      "decision": "add_variant",
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-RELEASE-P",
+        "CI-DEPLOY-01-PR-N",
+        "CI-DEPLOY-01-IDENTITY-N",
+        "CI-DEPLOY-01-REF-N",
+        "CI-DEPLOY-01-LOCAL-N"
+      ],
+      "reason": "Local CD adds a negative CI-admission scenario, exact-revision artifact checks and HTTP candidate validation. Cloud deployment retains its manual identity boundary."
+    },
+    {
+      "path": ".github/workflows/cd.yml",
+      "symbol": "workflow.on",
+      "fingerprint": "190affd4d1f0339c69906af815698c021960d311243aca241bca00265c219b9b",
+      "decision": "add_variant",
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-RELEASE-P",
+        "CI-DEPLOY-01-PR-N",
+        "CI-DEPLOY-01-IDENTITY-N",
+        "CI-DEPLOY-01-REF-N",
+        "CI-DEPLOY-01-LOCAL-N"
+      ],
+      "reason": "Local CD adds a negative CI-admission scenario, exact-revision artifact checks and HTTP candidate validation. Cloud deployment retains its manual identity boundary."
+    },
+    {
+      "path": ".github/workflows/cd.yml",
+      "symbol": "workflow.permissions",
+      "fingerprint": "551b70084a8244c7f3114d8603c3d2ddac6b642093a4b34cd2e3a00b7e4f8ee1",
+      "decision": "add_variant",
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-RELEASE-P",
+        "CI-DEPLOY-01-PR-N",
+        "CI-DEPLOY-01-IDENTITY-N",
+        "CI-DEPLOY-01-REF-N",
+        "CI-DEPLOY-01-LOCAL-N"
+      ],
+      "reason": "Local CD adds a negative CI-admission scenario, exact-revision artifact checks and HTTP candidate validation. Cloud deployment retains its manual identity boundary."
+    },
+    {
+      "path": ".github/workflows/cd.yml",
+      "symbol": "workflow.concurrency",
+      "fingerprint": "2bf982d423b36445170d8cdf8871221a7c234ea9fd80a028c17564a7ba029cfc",
+      "decision": "add_variant",
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-RELEASE-P",
+        "CI-DEPLOY-01-PR-N",
+        "CI-DEPLOY-01-IDENTITY-N",
+        "CI-DEPLOY-01-REF-N",
+        "CI-DEPLOY-01-LOCAL-N"
+      ],
+      "reason": "Local CD adds a negative CI-admission scenario, exact-revision artifact checks and HTTP candidate validation. Cloud deployment retains its manual identity boundary."
+    },
+    {
+      "path": ".github/workflows/cd.yml",
+      "symbol": "workflow.jobs.delivery",
+      "fingerprint": "679c436cacb203b9439ee0c184986f396c0d2fbce5a2f4b004c9e92d43374259",
+      "decision": "add_variant",
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-RELEASE-P",
+        "CI-DEPLOY-01-PR-N",
+        "CI-DEPLOY-01-IDENTITY-N",
+        "CI-DEPLOY-01-REF-N",
+        "CI-DEPLOY-01-LOCAL-N"
+      ],
+      "reason": "Local CD adds a negative CI-admission scenario, exact-revision artifact checks and HTTP candidate validation. Cloud deployment retains its manual identity boundary."
+    },
+    {
+      "path": "delivery/build_release.py",
+      "symbol": "file",
+      "fingerprint": "05897eaad83caa15b9262fd962f75f1b304eb54760be55aa34afa5481b72b0a6",
+      "decision": "add_variant",
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-RELEASE-P",
+        "CI-DEPLOY-01-PR-N",
+        "CI-DEPLOY-01-IDENTITY-N",
+        "CI-DEPLOY-01-REF-N",
+        "CI-DEPLOY-01-LOCAL-N"
+      ],
+      "reason": "Local CD adds a negative CI-admission scenario, exact-revision artifact checks and HTTP candidate validation. Cloud deployment retains its manual identity boundary."
+    },
+    {
+      "path": "delivery/test_release.py",
+      "symbol": "file",
+      "fingerprint": "8f06cd3ebc1c63cb3c5751cf35bfb5113e1133aedb19d5226f91b2966c1d1463",
+      "decision": "add_variant",
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-RELEASE-P",
+        "CI-DEPLOY-01-PR-N",
+        "CI-DEPLOY-01-IDENTITY-N",
+        "CI-DEPLOY-01-REF-N",
+        "CI-DEPLOY-01-LOCAL-N"
+      ],
+      "reason": "Local CD adds a negative CI-admission scenario, exact-revision artifact checks and HTTP candidate validation. Cloud deployment retains its manual identity boundary."
+    },
+    {
+      "path": "delivery/agent.mjs",
+      "symbol": "file",
+      "fingerprint": "4cb8be8e0ff18c8cb6c34f339cf3679201dec6d0c06f500fe3337d16331fe765",
+      "decision": "add_variant",
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-RELEASE-P",
+        "CI-DEPLOY-01-PR-N",
+        "CI-DEPLOY-01-IDENTITY-N",
+        "CI-DEPLOY-01-REF-N",
+        "CI-DEPLOY-01-LOCAL-N"
+      ],
+      "reason": "Local CD adds a negative CI-admission scenario, exact-revision artifact checks and HTTP candidate validation. Cloud deployment retains its manual identity boundary."
+    },
+    {
+      "path": "delivery/deploy.py",
+      "symbol": "file",
+      "fingerprint": "c212d325ac027047c3426cfedd671ba25e7d79e16c510eb52d803f0dd8430dff",
+      "decision": "add_variant",
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-RELEASE-P",
+        "CI-DEPLOY-01-PR-N",
+        "CI-DEPLOY-01-IDENTITY-N",
+        "CI-DEPLOY-01-REF-N",
+        "CI-DEPLOY-01-LOCAL-N"
+      ],
+      "reason": "Local CD adds a negative CI-admission scenario, exact-revision artifact checks and HTTP candidate validation. Cloud deployment retains its manual identity boundary."
+    },
+    {
       "path": ".github/workflows/ci.yml",
       "symbol": "workflow.name",
       "fingerprint": "a01290cf43d0386e9b0d6323820e131971c8c2b77caeff7cbd0f90e32d40fbcc",

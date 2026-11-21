@@ -24,7 +24,7 @@ test('every catalog scenario has an executable binding and every current source 
   const result = validateCatalog();
   assert.deepEqual(result.errors, []);
   assert.equal(result.matrices, 13);
-  assert.equal(result.scenarios, 41);
+  assert.equal(result.scenarios, 42);
 });
 
 test('matrix IDs and scenario IDs select the same complete matrix', () => {

@@ -18,6 +18,7 @@
     "NETWORK-01"
   ],
   "scenario_to_matrix": {
+    "CI-DEPLOY-01-LOCAL-N": "CI-DEPLOY-01",
     "PLATFORM-BASELINE-01-READY-P": "PLATFORM-BASELINE-01",
     "PLATFORM-BASELINE-01-ADDON-N": "PLATFORM-BASELINE-01",
     "PLATFORM-BASELINE-01-VERSION-N": "PLATFORM-BASELINE-01",
@@ -61,6 +62,65 @@
     "NETWORK-01-PUBLIC-N": "NETWORK-01"
   },
   "sources": [
+    {
+      "path": "delivery/check_install.py",
+      "symbol_prefixes": ["file"],
+      "matrix_ids": ["CI-DEPLOY-01"]
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "symbol_prefixes": ["workflow.jobs.delivery-policy"],
+      "matrix_ids": ["CI-DEPLOY-01"]
+    },
+    {
+      "path": ".github/workflows/cd.yml",
+      "symbol_prefixes": [
+        "workflow.name",
+        "workflow.on",
+        "workflow.permissions",
+        "workflow.concurrency",
+        "workflow.jobs.delivery"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "delivery/build_release.py",
+      "symbol_prefixes": [
+        "file"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "delivery/test_release.py",
+      "symbol_prefixes": [
+        "file"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "delivery/agent.mjs",
+      "symbol_prefixes": [
+        "file"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
+    {
+      "path": "delivery/deploy.py",
+      "symbol_prefixes": [
+        "file"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
+    },
     {
       "path": ".github/workflows/ci.yml",
       "symbol_prefixes": [

@@ -59,6 +59,7 @@ const negativeChanges = {
     });
   },
   'CI-DEPLOY-01-REF-N': evidence => { evidence.workflows['.github/workflows/release.yml'].jobs.deploy.if = 'always()'; },
+  'CI-DEPLOY-01-LOCAL-N': evidence => { evidence.workflows['.github/workflows/cd.yml'].jobs.delivery.if = 'always()'; },
   'IMAGE-BUILD-01-METADATA-N': evidence => { evidence.image.marker_hits = ['image configuration or history']; },
   'IMAGE-BUILD-01-LAYER-N': evidence => { evidence.image.marker_hits = ['exported layer 0']; },
   'REGISTRY-IAM-01-ROLE-N': evidence => {

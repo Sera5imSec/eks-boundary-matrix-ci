@@ -256,6 +256,18 @@ const checks = {
     for (const job of jobs) expect(hasReadOnlyTokenPermissions(job.permissions ?? ci.permissions), 'PR jobs have no OIDC token permission');
     const releaseTriggers = workflowTriggers(release.on);
     expect(releaseTriggers.length === 1 && releaseTriggers[0] === 'workflow_dispatch', 'release uses a manual trigger');
+    const delivery = known(evidence.workflows?.['.github/workflows/cd.yml'], 'local delivery workflow');
+    expect(delivery.on?.workflow_run?.workflows?.includes('Boundary Matrix Gate') &&
+      delivery.on.workflow_run.branches?.includes('main') && delivery.on.workflow_run.types?.includes('completed'),
+    'local delivery follows the completed main CI');
+    const deliveryCondition = "(github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || " +
+      "(github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && " +
+      "github.event.workflow_run.head_branch == 'main' && " +
+      "github.event.workflow_run.head_repository.full_name == github.repository && " +
+      "(github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch'))";
+    expect(delivery.jobs?.delivery?.if?.replace(/\s+/g, ' ').trim() === deliveryCondition,
+      'local delivery admits only successful same-repository main CI or a manual main request');
+    expect(hasReadOnlyTokenPermissions(delivery.permissions), 'local delivery has no cloud identity permissions');
     const predicate = "github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'";
     expect(release.jobs?.gate?.uses === './.github/workflows/ci.yml' &&
       asList(release.jobs?.publish?.needs).includes('gate'), 'publication requires the matrix CI gate');

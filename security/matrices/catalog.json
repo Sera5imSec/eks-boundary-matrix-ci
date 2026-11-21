@@ -1788,7 +1788,7 @@
         "github_aws_oidc",
         "aws_eks_endpoint"
       ],
-      "obligation": "PR validation has no AWS deployment credentials. Publication and deployment require the matrix gate and a manual main-branch release. Both AWS role trusts bind the exact repository and main ref.",
+      "obligation": "PR validation has no AWS deployment credentials. Publication and deployment require the matrix gate and a manual main-branch release. Both AWS role trusts bind the exact repository and main ref. Local image delivery requires successful same-repository main CI for the exact source revision; installation uses the verified image identity.",
       "evidence": {
         "ci": "Check the workflow and environment rules together with the IAM trust conditions using synthetic job contexts.",
         "runtime": "Use the Actions job record and an AWS role session audit record from the isolated demo environment to confirm the authorized release."
@@ -1817,6 +1817,12 @@
           "kind": "negative",
           "case": "A synthetic release job has an unapproved ref despite targeting the named environment.",
           "expected": "DENY"
+        },
+        {
+          "id": "CI-DEPLOY-01-LOCAL-N",
+          "kind": "negative",
+          "case": "The local delivery workflow admits an unapproved CI result or ref.",
+          "expected": "DENY"
         }
       ],
       "binding": {
@@ -1831,9 +1837,22 @@
       "implementation_inputs": [
         ".github/workflows/ci.yml",
         ".github/workflows/release.yml",
-        "patterns/fully-private-cluster/delivery.tf"
+        "patterns/fully-private-cluster/delivery.tf",
+        ".github/workflows/cd.yml",
+        "delivery/build_release.py",
+        "delivery/agent.mjs",
+        "delivery/deploy.py",
+        "delivery/check_install.py"
       ],
       "implementation_sources": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "symbols": ["workflow.jobs.delivery-policy"]
+        },
+        {
+          "path": "delivery/check_install.py",
+          "symbols": ["file"]
+        },
         {
           "path": ".github/workflows/ci.yml",
           "symbols": [
@@ -2168,6 +2187,60 @@
           "path": "patterns/fully-private-cluster/versions.tf",
           "symbols": [
             "terraform.0.required_version"
+          ]
+        },
+        {
+          "path": ".github/workflows/cd.yml",
+          "symbols": [
+            "workflow.name"
+          ]
+        },
+        {
+          "path": ".github/workflows/cd.yml",
+          "symbols": [
+            "workflow.on"
+          ]
+        },
+        {
+          "path": ".github/workflows/cd.yml",
+          "symbols": [
+            "workflow.permissions"
+          ]
+        },
+        {
+          "path": ".github/workflows/cd.yml",
+          "symbols": [
+            "workflow.concurrency"
+          ]
+        },
+        {
+          "path": ".github/workflows/cd.yml",
+          "symbols": [
+            "workflow.jobs.delivery"
+          ]
+        },
+        {
+          "path": "delivery/build_release.py",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "delivery/test_release.py",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "delivery/agent.mjs",
+          "symbols": [
+            "file"
+          ]
+        },
+        {
+          "path": "delivery/deploy.py",
+          "symbols": [
+            "file"
           ]
         }
       ]

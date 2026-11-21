@@ -6,3 +6,5 @@ node_modules/
 artifacts/
 *.log
 *.zip
+release/
+__pycache__/
