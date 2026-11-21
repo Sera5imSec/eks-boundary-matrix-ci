@@ -141,8 +141,8 @@
     {
       "path": "delivery/agent.mjs",
       "symbol": "file",
-      "fingerprint": "4cb8be8e0ff18c8cb6c34f339cf3679201dec6d0c06f500fe3337d16331fe765",
-      "decision": "add_variant",
+      "fingerprint": "e4ee6abe5fcee4b407e8ffb34f82452e1deed1a8c9e614a9c101f4bd52a7e5a7",
+      "decision": "existing_rule",
       "matrix_ids": [
         "CI-DEPLOY-01"
       ],
