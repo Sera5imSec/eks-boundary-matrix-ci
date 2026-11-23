@@ -1,6 +1,6 @@
 # EKS Boundary Matrix CI
 
-**[Workflow and matrix structure in Russian](docs/WORKFLOW.ru.md)** — development,
+**[Workflow and matrix structure](docs/WORKFLOW.md)** — development,
 source coverage review, matrix selection, normal CI, separate manual source
 mutations and release setup.
 
