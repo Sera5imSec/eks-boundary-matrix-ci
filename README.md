@@ -84,9 +84,13 @@ npm run matrix:ci
 For a change against a known Git base commit, run the gate with `--base`.
 
 ```sh
+node security/matrix_ci.mjs review --base BASE_COMMIT_SHA
 node security/matrix_ci.mjs run --base BASE_COMMIT_SHA
 ```
 
+The coverage-only `review` command writes reports before returning a failure;
+it does not execute Terraform, build an image or claim a matrix-runtime pass.
+Normal CI runs this preflight before gate integrity tests and runtime preparation.
 Inspect `artifacts/change-impact.json` and `artifacts/boundary-review.json` for
 the exact unit fingerprint and candidate matrix IDs. Record the decision in
 `security/matrices/code_decisions.json` and add scenario bindings when needed.
@@ -94,6 +98,13 @@ Coverage decisions are review inputs; they do not repair a failing rule.
 
 The report and evidence are written under `artifacts/`. The normal CI job
 uploads JSON and Markdown evidence through GitHub Actions.
+
+For a stopped PR, use the [GitHub Agent handoff](docs/AGENT-HANDOFF.md).
+The repository includes [contributor instructions](AGENTS.md) and a
+[Boundary Coverage agent profile](.github/agents/boundary-coverage.agent.md).
+A maintainer starts the agent task, reviews its actual coverage changes and
+allows workflow execution if GitHub requires it. There is no automatic agent
+invocation or change to approval/merge settings in this repository.
 
 ## Manual sensitivity
 
