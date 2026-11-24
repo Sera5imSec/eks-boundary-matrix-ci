@@ -4183,6 +4183,30 @@
         "NETWORK-01-PUBLIC-N"
       ],
       "reason": "The matrix job now emits source coverage handoff reports before stopping. Existing matrix/scenario coverage remains required; source-review regression tests verify unresolved units stop before runtime. The workflow retains read-only PR permissions and manual-only source sensitivity."
+    },
+    {
+      "path": "patterns/fully-private-cluster/main.tf",
+      "symbol": "module.eks.0.eks_managed_node_groups",
+      "fingerprint": "a8a27a8e68f9639256c120a4d128c4d09b6c488265cf0adf67f6676a089cc447",
+      "decision": "existing_rule",
+      "matrix_ids": [
+        "NODE-NETWORK-01",
+        "ECR-PRIVATE-PULL-01",
+        "REGISTRY-IAM-01"
+      ],
+      "variant_ids": [
+        "NODE-NETWORK-01-PRIVATE-P",
+        "NODE-NETWORK-01-ROUTE-N",
+        "NODE-NETWORK-01-SUBNET-N",
+        "ECR-PRIVATE-PULL-01-PATH-P",
+        "ECR-PRIVATE-PULL-01-DNS-N",
+        "ECR-PRIVATE-PULL-01-S3-N",
+        "REGISTRY-IAM-01-PUBLISH-P",
+        "REGISTRY-IAM-01-PULL-P",
+        "REGISTRY-IAM-01-ROLE-N",
+        "REGISTRY-IAM-01-REPO-N"
+      ],
+      "reason": "Reviewed desired node capacity change from 3 to 2 within min_size 1 and max_size 5. Subnet IDs, private node addressing and routes, ECR/S3 endpoint paths and node IAM role/policy inputs are unchanged. Existing NODE-NETWORK-01, ECR-PRIVATE-PULL-01 and REGISTRY-IAM-01 controls and negative scenarios still check those boundaries against freshly evaluated resources. No new security boundary or permission is introduced; availability and capacity sizing are outside these obligations. This review does not claim runtime success; the selected matrices must pass independently."
     }
   ]
 }
