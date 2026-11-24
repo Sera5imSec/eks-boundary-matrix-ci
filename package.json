@@ -9,6 +9,7 @@
   "scripts": {
     "test": "node --test security/test_*.mjs",
     "matrix:validate": "node security/matrix_ci.mjs validate",
+    "matrix:review": "node security/matrix_ci.mjs review --full",
     "matrix:ci": "node security/matrix_ci.mjs run --full",
     "matrix:sensitivity": "node security/matrix_sensitivity.mjs --matrix all"
   },

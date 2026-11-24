@@ -7,7 +7,7 @@ import { oracleIds } from './matrix_oracles.mjs';
 import { negativeCaseIds, runCases } from './matrix_cases.mjs';
 import { verifyFreshness } from './matrix_runtime.mjs';
 import { prepareEvidence } from './prepare_evidence.mjs';
-import { createReport, saveReport } from './matrix_report.mjs';
+import { createReport, markdownReport, saveReport } from './matrix_report.mjs';
 
 export function validateCatalog(root = ROOT) {
   const catalog = readJson(CATALOG, root);
@@ -56,6 +56,70 @@ export function validateCatalog(root = ROOT) {
     source_units: inventory.length, errors };
 }
 
+export function reviewSource(options = {}) {
+  const root = options.root ?? ROOT;
+  const output = path.join(root, 'artifacts');
+  fs.mkdirSync(output, { recursive: true });
+  let validation;
+  let impact;
+  let review;
+  let catalog;
+  let bindings;
+  try { validation = validateCatalog(root); }
+  catch (error) { validation = { schema_version: 1, status: 'ERROR', errors: [error.message] }; }
+  writeJson(path.join(output, 'catalog-validation.json'), validation);
+  try { impact = impactReport({ root, full: options.full, base: options.base }); }
+  catch (error) {
+    impact = { schema_version: 1, mode: 'error', status: 'ERROR', changed_files: [], changed_units: [], errors: [error.message] };
+  }
+  writeJson(path.join(output, 'change-impact.json'), impact);
+  try {
+    catalog = readJson(CATALOG, root);
+    bindings = readJson(BINDINGS, root);
+    if (impact.status === 'ERROR') throw new Error('Source change analysis failed; changed units could not be reviewed');
+    review = reviewImpact(impact, catalog, bindings, readJson(DECISIONS, root));
+  } catch (error) { review = { schema_version: 1, status: 'ERROR', rows: [], errors: [error.message] }; }
+  writeJson(path.join(output, 'boundary-review.json'), review);
+  const errors = [...new Set([...validation.errors, ...(impact.errors ?? []), ...review.errors])];
+  const selection = errors.length
+    ? { schema_version: 1, mode: 'blocked', matrix_ids: [], reason: 'Source review must pass before runtime selection' }
+    : selectMatrices(impact, catalog, bindings, review);
+  writeJson(path.join(output, 'matrix-selection.json'), selection);
+  const result = {
+    schema_version: 1, status: errors.length ? 'FAIL' : 'PASS', phase: 'SOURCE_REVIEW',
+    coverage_status: review.status, changed_files: impact.changed_files.length,
+    changed_units: impact.changed_units.length, source_units: validation.source_units ?? null,
+    oracle_execution: 'NOT_RUN', errors
+  };
+  writeJson(path.join(output, 'source-review.json'), result);
+  const cell = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;').replaceAll('|', '\\|').replace(/[\r\n]+/g, ' ');
+  const changes = new Map(impact.changed_units.map(unit => [JSON.stringify([unit.path, unit.symbol]), unit.status]));
+  const markdown = [
+    '# Source coverage review', '',
+    '**' + result.status + '** — source review only; build and matrix oracles have not run.', '',
+    'Changed units: ' + result.changed_units + '. Current inventory: ' + (result.source_units ?? 'unknown') + '.', '',
+    '| Path | Symbol | Change | Before SHA-256 | Current / deleted SHA-256 | Candidate matrices | Decision | Review |',
+    '| --- | --- | --- | --- | --- | --- | --- | --- |',
+    ...review.rows.map(row => '| ' + [row.path, row.symbol, changes.get(JSON.stringify([row.path, row.symbol])),
+      row.before_fingerprint, row.fingerprint, row.candidate_matrix_ids.join(', '), row.decision, row.detail].map(cell).join(' | ') + ' |'),
+    '', ...errors.map(error => '- ' + cell(error)), '',
+    'For unresolved coverage, ask the maintainer or local assistant to review the PR diff using AGENTS.md and docs/SOURCE-REVIEW.md.',
+    'Candidate IDs are suggestions from recorded bindings, not proof that the scenarios are sufficient.',
+    'Review the proposed changes before allowing workflows and merging. Do not renew fingerprints without a coverage rationale.', ''
+  ].join('\n');
+  fs.writeFileSync(path.join(output, 'source-review.md'), markdown);
+  if (options.summary !== false && process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
+  // Replace old results before any build, including failed preflights in a reused local checkout.
+  writeJson(path.join(output, 'matrix-runtime.json'), { schema_version: 1, status: 'NOT_RUN', matrices: [] });
+  const pending = { schema_version: 1, status: errors.length ? 'FAIL' : 'NOT_RUN', phase: 'SOURCE_REVIEW',
+    selection: selection.mode, rows: [], errors, evidence_scope: 'Source coverage only; build and matrix oracles were not run',
+    deployed_aws_and_kubernetes: 'PENDING' };
+  writeJson(path.join(output, 'matrix-status.json'), pending);
+  fs.writeFileSync(path.join(output, 'matrix-status.md'), markdownReport(pending));
+  return { ...result, impact, review, selection };
+}
+
 export async function runGate(options = {}) {
   const root = options.root ?? ROOT;
   const output = path.join(root, 'artifacts');
@@ -64,17 +128,15 @@ export async function runGate(options = {}) {
   let review;
   let runtime;
   try {
-    const validation = validateCatalog(root);
-    writeJson(path.join(output, 'catalog-validation.json'), validation);
-    if (validation.errors.length) throw new Error(validation.errors.join('\n'));
+    const source = reviewSource({ ...options, summary: false });
+    selection = source.selection;
+    review = source.review;
+    if (source.errors.length) {
+      const report = readJson('artifacts/matrix-status.json', root);
+      saveReport(report, output);
+      return report;
+    }
     const catalog = readJson(CATALOG, root);
-    const bindings = readJson(BINDINGS, root);
-    const impact = impactReport({ root, full: options.full, base: options.base });
-    writeJson(path.join(output, 'change-impact.json'), impact);
-    review = reviewImpact(impact, catalog, bindings, readJson(DECISIONS, root));
-    writeJson(path.join(output, 'boundary-review.json'), review);
-    selection = selectMatrices(impact, catalog, bindings, review);
-    writeJson(path.join(output, 'matrix-selection.json'), selection);
     let evidence = null;
     if (selection.matrix_ids.length) {
       evidence = options.evidence ? readJson(options.evidence, root) : await prepareEvidence({ root, terraform: options.terraform ?? 'terraform' });
@@ -82,7 +144,7 @@ export async function runGate(options = {}) {
       runtime = runCases(catalog, selection.matrix_ids, evidence);
     } else runtime = { schema_version: 1, status: 'PASS', matrices: [] };
     writeJson(path.join(output, 'matrix-runtime.json'), runtime);
-    const report = createReport(selection, review, runtime);
+    const report = createReport(selection, review, runtime, catalog);
     saveReport(report, output);
     return report;
   } catch (error) {
@@ -102,6 +164,10 @@ if (isMain(import.meta)) {
       const report = validateCatalog();
       console.log(JSON.stringify(report, null, 2));
       process.exitCode = report.status === 'PASS' ? 0 : 1;
+    } else if (command === 'review') {
+      const report = reviewSource({ full: args.includes('--full'), base: argument(args, '--base') });
+      console.log(JSON.stringify(report, null, 2));
+      process.exitCode = report.status === 'PASS' ? 0 : 1;
     } else if (command === 'run') {
       const report = await runGate({ full: args.includes('--full'), base: argument(args, '--base'),
         evidence: argument(args, '--evidence'), terraform: argument(args, '--terraform', 'terraform') });
@@ -115,6 +181,6 @@ if (isMain(import.meta)) {
       console.log(JSON.stringify(selection));
     } else if (command === 'resolve') {
       console.log(JSON.stringify(selectedIds(readJson(CATALOG), argument(args, '--matrix', 'all'))));
-    } else throw new Error('Use validate, run, select or resolve');
+    } else throw new Error('Use validate, review, run, select or resolve');
   } catch (error) { console.error(error.message); process.exitCode = 2; }
 }

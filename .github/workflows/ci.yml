@@ -37,8 +37,16 @@ jobs:
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Install pinned parsers
         run: npm ci --ignore-scripts
-      - name: Validate catalog and scenario bindings
-        run: npm run matrix:validate
+      - name: Review source coverage and write handoff reports before building
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] || [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            node security/matrix_ci.mjs review --full
+          else
+            node security/matrix_ci.mjs review --base "$BASE_SHA"
+          fi
       - name: Check gate and source review integrity
         run: npm test
       - name: Review source changes, select matrices and run scenarios

@@ -185,6 +185,8 @@ PR / push to main / manual dispatch
   → check out source and install pinned tools
   → validate the catalog, oracles, scenarios and bindings
   → validate decisions for the entire current source inventory
+  → write impact, coverage and source-review reports before enforcing preflight
+  → unresolved coverage: stop before build; maintainer requests a review with a local assistant
   → run gate integrity tests
   → compare against the base commit and inspect changed/deleted units
   → validate coverage decisions for the changes
@@ -197,6 +199,22 @@ PR / push to main / manual dispatch
 ```
 
 An inventory, catalog or coverage error stops execution **before the oracles run**. This is a preflight failure; the report may not yet contain results for individual matrices.
+
+CI now starts with `node security/matrix_ci.mjs review --base BASE_COMMIT_SHA`
+(or `review --full` for a manual/initial run). It writes `catalog-validation.json`,
+`change-impact.json`, `boundary-review.json`, `source-review.json` and
+`source-review.md` before enforcing source-review errors. Parser/base errors are
+recorded explicitly, without inventing successful classifications. A passing
+coverage-only command leaves runtime and matrix status as `NOT_RUN`.
+
+For unresolved coverage, the maintainer gives the PR link to a local assistant,
+following [the source review guide](SOURCE-REVIEW.md). The assistant inspects the
+code and executable assertions, proposes and implements a reasoned coverage
+decision, and runs checks. The maintainer reviews the changes and authorizes the
+scoped commit/push. A new PR commit starts normal CI. There is no GitHub
+cloud-agent profile or subscription dependency. Merge remains subject to
+repository rules. The normal gate repeats source review before using fresh
+runtime evidence.
 
 ### Matrix selection
 
@@ -328,6 +346,7 @@ In GitHub, use **Actions → Boundary Matrix Gate → Run workflow** for a full 
 | `catalog-validation.json` | Completeness of the catalog, bindings and decisions for the current inventory |
 | `change-impact.json` | Changed files, symbols and fingerprints |
 | `boundary-review.json` | Coverage decisions for changed units |
+| `source-review.json` / `source-review.md` | Combined preflight verdict and readable review report, including early coverage failures |
 | `matrix-selection.json` | Selected matrices and selection rationale |
 | `terraform-test.jsonl` | Terraform evaluation log |
 | `evidence.json` | Configuration, image and source-provenance evidence |
