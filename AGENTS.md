@@ -1,6 +1,6 @@
 # Boundary Matrix Gate contributor instructions
 
-Use these instructions when reviewing source coverage or repairing this repository's CI. Read `docs/WORKFLOW.md` and `docs/AGENT-HANDOFF.md` for the workflow and evidence limits. Keep repository documentation and reports in English.
+Use these instructions when reviewing source coverage or repairing this repository's CI. Read `docs/WORKFLOW.md` and `docs/SOURCE-REVIEW.md` for the workflow and evidence limits. Keep repository documentation and reports in English. The maintainer requests a review from a local assistant; there is no GitHub cloud-agent integration.
 
 ## Read the change before choosing coverage
 
@@ -28,7 +28,7 @@ Terraform and Docker are required for runtime evidence. If a tool, provider or e
 
 Source mutation sensitivity runs only when explicitly requested, using the separate manual workflow. Do not add mutation execution to PR, push, scheduled CI or this agent's default task. Do not deploy to AWS, grant cloud credentials, change workflow approval settings or merge a PR as part of coverage repair.
 
-For a task assigned to an existing PR, commit the scoped changes only to that PR branch using the available agent workflow. Leave workflow approval and merge decisions to the maintainer. The repository does not automatically launch a cloud agent after a failed check.
+For a task about an existing PR, prepare scoped changes on that PR branch. Commit and push only within the user's authorized scope, using the available local Git workflow. Leave merge decisions to the maintainer. The repository does not launch a cloud assistant or require a Copilot subscription for source review.
 
 Finish with three items:
 

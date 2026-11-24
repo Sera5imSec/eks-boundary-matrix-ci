@@ -99,12 +99,11 @@ Coverage decisions are review inputs; they do not repair a failing rule.
 The report and evidence are written under `artifacts/`. The normal CI job
 uploads JSON and Markdown evidence through GitHub Actions.
 
-For a stopped PR, use the [GitHub Agent handoff](docs/AGENT-HANDOFF.md).
-The repository includes [contributor instructions](AGENTS.md) and a
-[Boundary Coverage agent profile](.github/agents/boundary-coverage.agent.md).
-A maintainer starts the agent task, reviews its actual coverage changes and
-allows workflow execution if GitHub requires it. There is no automatic agent
-invocation or change to approval/merge settings in this repository.
+For a stopped PR, use the [source coverage review guide](docs/SOURCE-REVIEW.md)
+and [contributor instructions](AGENTS.md). The maintainer gives the PR link to
+a local assistant, reviews the proposed coverage changes and authorizes a scoped
+commit/push. A new PR commit triggers normal CI. No GitHub cloud-agent profile,
+subscription or automatic assistant invocation is part of this process.
 
 ## Manual sensitivity
 

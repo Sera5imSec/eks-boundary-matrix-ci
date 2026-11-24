@@ -104,7 +104,7 @@ export function reviewSource(options = {}) {
     ...review.rows.map(row => '| ' + [row.path, row.symbol, changes.get(JSON.stringify([row.path, row.symbol])),
       row.before_fingerprint, row.fingerprint, row.candidate_matrix_ids.join(', '), row.decision, row.detail].map(cell).join(' | ') + ' |'),
     '', ...errors.map(error => '- ' + cell(error)), '',
-    'For unresolved coverage, ask the Boundary Coverage agent (or @copilot on this PR) to review the diff using AGENTS.md.',
+    'For unresolved coverage, ask the maintainer or local assistant to review the PR diff using AGENTS.md and docs/SOURCE-REVIEW.md.',
     'Candidate IDs are suggestions from recorded bindings, not proof that the scenarios are sufficient.',
     'Review the proposed changes before allowing workflows and merging. Do not renew fingerprints without a coverage rationale.', ''
   ].join('\n');

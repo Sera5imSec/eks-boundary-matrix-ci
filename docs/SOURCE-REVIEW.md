@@ -1,6 +1,6 @@
-# Source coverage review and GitHub Agent handoff
+# Source coverage review with a local assistant
 
-The normal CI prepares source-review reports before it stops for unresolved coverage. A maintainer can then ask GitHub Copilot or the repository's **Boundary Coverage** custom agent to analyze the PR and prepare justified changes. This is a manually initiated handoff, not an automatic cloud-agent invocation from Actions.
+The normal CI prepares source-review reports before it stops for unresolved coverage. The maintainer gives the PR link to a local assistant, which inspects the code and checks, prepares a justified coverage change and verifies it. No GitHub cloud-agent profile, subscription or automatic assistant invocation is required.
 
 ## End-to-end flow
 
@@ -9,13 +9,13 @@ Developer opens or updates a PR
   -> checkout and install pinned tools
   -> source review: catalog, current inventory and changed units
      -> parse path + symbol and compute SHA-256 fingerprints
-     -> write validation, impact, coverage review and handoff reports
+     -> write validation, impact and coverage review reports
      -> unresolved or invalid coverage: FAIL before any build
-        -> maintainer starts a task for the existing PR
-        -> agent reads the diff, reports, rules and executable checks
-        -> agent implements a justified coverage decision
-        -> commit to the PR branch
-        -> maintainer reviews the diff and permits Actions if required
+        -> maintainer gives the PR link to a local assistant
+        -> assistant reads the diff, reports, rules and executable checks
+        -> assistant implements and tests a justified coverage decision
+        -> maintainer reviews the diff and authorizes scoped commit/push
+        -> commit to the same PR branch
         -> a NEW CI run starts from checkout
      -> coverage is current: continue
   -> gate integrity tests
@@ -45,26 +45,25 @@ All recognized current units are reviewed, including unchanged ones. The invento
 | `new_matrix` | Boundary, obligation, oracle, controls, scenarios, fixtures, bindings and decision |
 | `not_security` | Specific rationale within the defined scope; no matrix/scenario IDs |
 
-The agent proposes coverage by reading code and checks; SHA-256 only identifies changed content. Reference validation cannot establish semantic completeness. Review the agent's rationale and actual assertions. A correct journal entry does not make an unsafe configuration pass an oracle.
+The assistant proposes coverage by reading code and checks; SHA-256 only identifies changed content. Reference validation cannot establish semantic completeness. Review the rationale and actual assertions. A correct journal entry does not make an unsafe configuration pass an oracle.
 
-## Starting a task on GitHub
+## Requesting a review
 
-Enable Copilot cloud agent for the repository using a supported account and plan. Once the profile is available in GitHub, select **Boundary Coverage** from the Agents interface and explicitly supply the PR and base SHA. For an existing PR, a comment mentioning `@copilot` is another supported entry point. Do not assume a generic Agents task will automatically target the intended PR branch.
+Send the PR URL and intended behavior to the assistant in the current chat. When it has repository and Actions access, there is no need to download JSON reports or calculate SHA-256 manually. If access is unavailable, provide the relevant diff and reports through an authorized channel.
 
 Suggested task:
 
 ```text
-Review source coverage for this PR using AGENTS.md and docs/AGENT-HANDOFF.md.
+Review source coverage for PR <URL> using AGENTS.md and docs/SOURCE-REVIEW.md.
 Use the actual PR base SHA and inspect the source-review artifacts or regenerate them.
 Implement justified existing_rule, add_variant, new_matrix or not_security decisions,
 including executable checks and bindings where needed. Preserve established policy.
 Run normal tests and the gate; report exact results and incomplete checks.
-Commit the scoped changes to this PR branch. Do not merge or run source mutations.
+Prepare scoped changes for this PR branch. Do not merge or run source mutations.
+Commit/push only when authorized in this task.
 ```
 
-By default, Copilot changes require a maintainer to choose **Approve and run workflows**. GitHub offers a separate setting for automatic workflow execution; this repository change does not enable it. Workflow-run approval and PR review/merge are different actions. Required reviews and required status checks depend on repository settings; the author cannot approve their own PR. No fixed number of approvals or execution time is promised.
-
-Official references: [custom agent configuration](https://docs.github.com/en/copilot/reference/custom-agents-configuration), [agent branch access](https://docs.github.com/en/copilot/concepts/security-governance-and-network-settings/risks-and-mitigations), [workflow approval](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/review-copilot-output).
+An ordinary authorized commit/push to the PR branch triggers normal CI; this process has no Copilot-specific workflow approval. General GitHub trust restrictions, required reviews and required status checks still follow the repository settings. A failed CI run ends; the corrected commit starts a new run. No fixed number of approvals or execution time is promised.
 
 ## Local commands and artifacts
 
@@ -86,7 +85,7 @@ The `review` command returns `0` for a passing source review or `1` for a failed
 | `catalog-validation.json` | Catalog consistency and decisions for the whole current inventory |
 | `change-impact.json` | Changed paths, symbols, classifications and before/after fingerprints |
 | `boundary-review.json` | Candidate matrices, matched decisions and unresolved coverage |
-| `source-review.json` / `source-review.md` | Combined preflight verdict and readable agent handoff |
+| `source-review.json` / `source-review.md` | Combined preflight verdict and readable review report |
 | `matrix-selection.json` | Selected matrices, or `blocked` until review passes |
 | `matrix-runtime.json` | `NOT_RUN` before runtime, then actual scenario results |
 | `matrix-status.json` / `matrix-status.md` | Current gate status; `NOT_RUN` after a passing coverage-only command |
