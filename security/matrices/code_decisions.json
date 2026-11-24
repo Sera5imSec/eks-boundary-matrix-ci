@@ -4183,6 +4183,30 @@
         "NETWORK-01-PUBLIC-N"
       ],
       "reason": "The matrix job now emits source coverage handoff reports before stopping. Existing matrix/scenario coverage remains required; source-review regression tests verify unresolved units stop before runtime. The workflow retains read-only PR permissions and manual-only source sensitivity."
+    },
+    {
+      "path": "app/kubernetes/workload.yaml",
+      "symbol": "Deployment.matrix-demo.metadata",
+      "fingerprint": "ea2e3981daeea6ce3298cbeb0ec8c5130223ac6af4666bcc8ad04c71c93223df",
+      "decision": "existing_rule",
+      "matrix_ids": [
+        "IMAGE-01",
+        "WORKLOAD-IAM-01",
+        "NETWORK-01"
+      ],
+      "variant_ids": [
+        "IMAGE-01-DIGEST-P",
+        "IMAGE-01-MISMATCH-N",
+        "IMAGE-01-TAG-N",
+        "WORKLOAD-IAM-01-READ-P",
+        "WORKLOAD-IAM-01-ACCOUNT-N",
+        "WORKLOAD-IAM-01-OBJECT-N",
+        "WORKLOAD-IAM-01-PUBLIC-STORAGE-N",
+        "WORKLOAD-IAM-01-STS-N",
+        "NETWORK-01-INTERNAL-P",
+        "NETWORK-01-PUBLIC-N"
+      ],
+      "reason": "Reviewed addition of the informational app.kubernetes.io/version=1.0.0 Deployment label. Name, namespace, the entire pod template and Service are unchanged; no source in this project uses this label for authorization or routing. Existing IMAGE-01, WORKLOAD-IAM-01 and NETWORK-01 controls and negative scenarios remain applicable to the image identity, workload permissions and internal networking boundaries. A separate manifest check verified the label value and that no other manifest fields changed. The security scenarios do not validate application-version semantics; no new security obligation is introduced by this label."
     }
   ]
 }
