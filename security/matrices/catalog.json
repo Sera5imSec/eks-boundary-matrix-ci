@@ -41,7 +41,8 @@
     "aws_ecr_endpoints": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html",
     "github_aws_oidc": "https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws",
     "aws_eks_irsa": "https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html",
-    "aws_subnet_public_ipv4": "https://docs.aws.amazon.com/vpc/latest/userguide/subnet-public-ip.html"
+    "aws_subnet_public_ipv4": "https://docs.aws.amazon.com/vpc/latest/userguide/subnet-public-ip.html",
+    "aws_s3_block_public_access": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
   },
   "source_inventory": [
     {
@@ -158,6 +159,24 @@
         "PLATFORM-BASELINE-01"
       ],
       "decision": "The executable platform oracle checks the cluster version and required add-on assignments."
+    },
+    {
+      "id": "SRC-STORAGE-PRIVATE",
+      "file": "patterns/fully-private-cluster/delivery.tf",
+      "block": "resource.aws_s3_bucket / resource.aws_s3_bucket_public_access_block",
+      "anchors": [
+        "demo",
+        "practice_logs",
+        "bucket",
+        "block_public_acls",
+        "block_public_policy",
+        "ignore_public_acls",
+        "restrict_public_buckets"
+      ],
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ],
+      "decision": "Inspect every managed bucket and resolve the protection-to-bucket association. Protection on the demo bucket does not cover the additional log bucket."
     }
   ],
   "matrices": [
@@ -1847,11 +1866,15 @@
       "implementation_sources": [
         {
           "path": ".github/workflows/ci.yml",
-          "symbols": ["workflow.jobs.delivery-policy"]
+          "symbols": [
+            "workflow.jobs.delivery-policy"
+          ]
         },
         {
           "path": "delivery/check_install.py",
-          "symbols": ["file"]
+          "symbols": [
+            "file"
+          ]
         },
         {
           "path": ".github/workflows/ci.yml",
@@ -4399,6 +4422,87 @@
           "path": "patterns/fully-private-cluster/versions.tf",
           "symbols": [
             "terraform.0.required_version"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "STORAGE-PRIVATE-01",
+      "boundary": "Declared S3 bucket storage to public access through bucket policies and ACLs",
+      "basis": "PROPOSED_POLICY",
+      "source_refs": [
+        "SRC-STORAGE-PRIVATE"
+      ],
+      "documentation": [
+        "aws_s3_block_public_access"
+      ],
+      "obligation": "Every managed S3 bucket in this private demonstration retains an explicit bucket-level public access block with all four flags enabled and the exact bucket ID as its target. Missing, misdirected or disabled protection is rejected. This is a configuration policy, not a claim of observed anonymous access or a complete effective-IAM evaluation.",
+      "evidence": {
+        "ci": "Enumerate evaluated managed S3 buckets, require resolved distinct identities, join public access blocks by exact bucket ID and check all four flags. Unknown evidence requires REVIEW.",
+        "runtime": "Separately confirm deployed bucket controls and evaluate effective access with authorized synthetic principals and objects. Not performed by the normal gate."
+      },
+      "variants": [
+        {
+          "id": "STORAGE-PRIVATE-01-BLOCKED-P",
+          "kind": "positive",
+          "case": "Every declared managed S3 bucket has one explicit public access block targeting its own resolved ID, with all four flags enabled.",
+          "expected": "PASS"
+        },
+        {
+          "id": "STORAGE-PRIVATE-01-MISSING-N",
+          "kind": "negative",
+          "case": "The additional log bucket has no public access block while the demo bucket remains protected.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "STORAGE-PRIVATE-01-FLAG-N",
+          "kind": "negative",
+          "case": "The log bucket public policy restriction is disabled in controlled evidence.",
+          "expected": "REJECT"
+        },
+        {
+          "id": "STORAGE-PRIVATE-01-TARGET-N",
+          "kind": "negative",
+          "case": "The log bucket public access block targets the demo bucket instead of its own bucket.",
+          "expected": "REJECT"
+        }
+      ],
+      "binding": {
+        "oracle": "STORAGE-PRIVATE-01",
+        "runner": "security/matrix_runtime.mjs",
+        "execution": "configuration and controlled fixtures",
+        "evidence_domains": [
+          "TERRAFORM_MOCK_STATE"
+        ]
+      },
+      "implementation_inputs": [
+        "Managed S3 bucket identities",
+        "Bucket-level public access blocks",
+        "Distinct Terraform mock identities for the demo and log buckets"
+      ],
+      "implementation_sources": [
+        {
+          "path": "patterns/fully-private-cluster/delivery.tf",
+          "symbols": [
+            "resource.aws_s3_bucket.demo.0.bucket_prefix",
+            "resource.aws_s3_bucket.demo.0.tags",
+            "resource.aws_s3_bucket_public_access_block.demo.0.block_public_acls",
+            "resource.aws_s3_bucket_public_access_block.demo.0.block_public_policy",
+            "resource.aws_s3_bucket_public_access_block.demo.0.bucket",
+            "resource.aws_s3_bucket_public_access_block.demo.0.ignore_public_acls",
+            "resource.aws_s3_bucket_public_access_block.demo.0.restrict_public_buckets",
+            "resource.aws_s3_bucket.practice_logs.0.bucket_prefix",
+            "resource.aws_s3_bucket_public_access_block.practice_logs.0.block_public_acls",
+            "resource.aws_s3_bucket_public_access_block.practice_logs.0.block_public_policy",
+            "resource.aws_s3_bucket_public_access_block.practice_logs.0.bucket",
+            "resource.aws_s3_bucket_public_access_block.practice_logs.0.ignore_public_acls",
+            "resource.aws_s3_bucket_public_access_block.practice_logs.0.restrict_public_buckets"
+          ]
+        },
+        {
+          "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
+          "symbols": [
+            "file"
           ]
         }
       ]

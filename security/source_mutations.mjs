@@ -50,6 +50,9 @@ module "vpc_endpoints" {`),
     'verbs: ["get", "list", "watch", "patch", "update"]', 'verbs: ["*"]'),
   probe('WORKLOAD-IAM-01', delivery, 'terraform', 'Add object deletion to the read-only workload grant',
     'Action   = ["s3:GetObject"]', 'Action   = ["s3:GetObject", "s3:DeleteObject"]'),
+  probe('STORAGE-PRIVATE-01', delivery, 'terraform', 'Disable the additional log bucket public policy restriction',
+    'bucket                  = aws_s3_bucket.practice_logs.id\n  block_public_acls       = true\n  block_public_policy     = true',
+    'bucket                  = aws_s3_bucket.practice_logs.id\n  block_public_acls       = true\n  block_public_policy     = false'),
   probe('NETWORK-01', workload, 'configuration', 'Publish the internal Service through a LoadBalancer',
     'type: ClusterIP', 'type: LoadBalancer')
 ];

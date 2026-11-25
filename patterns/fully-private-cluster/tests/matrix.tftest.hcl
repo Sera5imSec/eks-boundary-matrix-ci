@@ -87,6 +87,14 @@ mock_provider "null" {}
 mock_provider "cloudinit" {}
 
 override_resource {
+  target = aws_s3_bucket.practice_logs
+  values = {
+    arn = "arn:aws:s3:::matrix-practice-logs-fixture"
+    id  = "matrix-practice-logs-fixture"
+  }
+}
+
+override_resource {
   target = aws_iam_role.publisher
   values = { arn = "arn:aws:iam::111122223333:role/matrix-publisher" }
 }
