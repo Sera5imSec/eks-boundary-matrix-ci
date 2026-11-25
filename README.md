@@ -1,8 +1,11 @@
 # EKS Boundary Matrix CI
 
-**[Workflow and matrix structure](docs/WORKFLOW.md)** — development,
-source coverage review, matrix selection, normal CI, separate manual source
-mutations and release setup.
+## Start here: [Current project workflow](docs/WORKFLOW.md)
+
+> [!IMPORTANT]
+> Read this guide to understand the workflow used in this project: source-to-matrix
+> coverage, PR review with a local assistant following `AGENTS.md`, matrix selection,
+> evidence and CI/CD. Source mutation checks run separately, on demand.
 
 This project adapts the Fully Private Cluster pattern from Amazon EKS Blueprints
 for Terraform. The source is pinned to upstream commit
