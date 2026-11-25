@@ -145,3 +145,7 @@ output "delivery_contract" {
     service_account = local.service_account
   }
 }
+
+resource "aws_s3_bucket" "practice_logs" {
+  bucket_prefix = "matrix-practice-logs-"
+}
