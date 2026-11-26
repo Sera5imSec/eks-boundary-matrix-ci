@@ -35,7 +35,7 @@ module "eks" {
   cluster_version = "1.35"
 
   cluster_endpoint_private_access = true
-  cluster_endpoint_public_access  = false
+  cluster_endpoint_public_access  = true 
 
   # EKS Addons
   cluster_addons = {
