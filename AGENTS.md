@@ -34,4 +34,4 @@ Finish with three items:
 
 1. Changed behavior and affected source units.
 2. Each coverage decision, its rationale, matrix IDs and scenario IDs; list actual implementation changes.
-3. Commands and observed results, including unresolved failures, unsupported evidence and checks not completed. Distinguish source review, matrix runtime and deployed observations.
+3. Commands and observed results, including unresolved failures, unsupported evidence and checks not completed. Distinguish source review, matrix runtime and deployed observations .
