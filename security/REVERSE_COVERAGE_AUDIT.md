@@ -25,3 +25,13 @@ whether the declared rule still holds.
 This review follows the selected root configuration and its evaluated module
 resources. The full upstream patterns collection and independent cloud runtime
 behavior have separate scopes.
+
+## PR #4: additional log storage
+
+The added `practice_logs` bucket is independent of the demo object grant checked by
+`WORKLOAD-IAM-01`. `STORAGE-PRIVATE-01` now enumerates all managed S3 buckets and
+requires an explicit public access block for each exact bucket ID, with all four
+flags enabled. Terraform mocks give the log bucket a distinct identity. Controlled
+fixtures reject missing protection, a disabled flag and protection attached to the
+wrong bucket. This is declared configuration evidence; deployed access remains
+unobserved. See [the PR review](../docs/PR-4-SOURCE-REVIEW.md).

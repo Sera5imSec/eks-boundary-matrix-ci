@@ -15,7 +15,8 @@
     "IMAGE-01",
     "DEPLOY-RBAC-01",
     "WORKLOAD-IAM-01",
-    "NETWORK-01"
+    "NETWORK-01",
+    "STORAGE-PRIVATE-01"
   ],
   "scenario_to_matrix": {
     "CI-DEPLOY-01-LOCAL-N": "CI-DEPLOY-01",
@@ -59,18 +60,30 @@
     "WORKLOAD-IAM-01-PUBLIC-STORAGE-N": "WORKLOAD-IAM-01",
     "WORKLOAD-IAM-01-STS-N": "WORKLOAD-IAM-01",
     "NETWORK-01-INTERNAL-P": "NETWORK-01",
-    "NETWORK-01-PUBLIC-N": "NETWORK-01"
+    "NETWORK-01-PUBLIC-N": "NETWORK-01",
+    "STORAGE-PRIVATE-01-BLOCKED-P": "STORAGE-PRIVATE-01",
+    "STORAGE-PRIVATE-01-MISSING-N": "STORAGE-PRIVATE-01",
+    "STORAGE-PRIVATE-01-FLAG-N": "STORAGE-PRIVATE-01",
+    "STORAGE-PRIVATE-01-TARGET-N": "STORAGE-PRIVATE-01"
   },
   "sources": [
     {
       "path": "delivery/check_install.py",
-      "symbol_prefixes": ["file"],
-      "matrix_ids": ["CI-DEPLOY-01"]
+      "symbol_prefixes": [
+        "file"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
     },
     {
       "path": ".github/workflows/ci.yml",
-      "symbol_prefixes": ["workflow.jobs.delivery-policy"],
-      "matrix_ids": ["CI-DEPLOY-01"]
+      "symbol_prefixes": [
+        "workflow.jobs.delivery-policy"
+      ],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ]
     },
     {
       "path": ".github/workflows/cd.yml",
@@ -1040,7 +1053,8 @@
         "resource.aws_s3_bucket.demo.0.bucket_prefix"
       ],
       "matrix_ids": [
-        "WORKLOAD-IAM-01"
+        "WORKLOAD-IAM-01",
+        "STORAGE-PRIVATE-01"
       ]
     },
     {
@@ -1049,7 +1063,8 @@
         "resource.aws_s3_bucket.demo.0.tags"
       ],
       "matrix_ids": [
-        "WORKLOAD-IAM-01"
+        "WORKLOAD-IAM-01",
+        "STORAGE-PRIVATE-01"
       ]
     },
     {
@@ -1058,7 +1073,8 @@
         "resource.aws_s3_bucket_public_access_block.demo.0.block_public_acls"
       ],
       "matrix_ids": [
-        "WORKLOAD-IAM-01"
+        "WORKLOAD-IAM-01",
+        "STORAGE-PRIVATE-01"
       ]
     },
     {
@@ -1067,7 +1083,8 @@
         "resource.aws_s3_bucket_public_access_block.demo.0.block_public_policy"
       ],
       "matrix_ids": [
-        "WORKLOAD-IAM-01"
+        "WORKLOAD-IAM-01",
+        "STORAGE-PRIVATE-01"
       ]
     },
     {
@@ -1076,7 +1093,8 @@
         "resource.aws_s3_bucket_public_access_block.demo.0.bucket"
       ],
       "matrix_ids": [
-        "WORKLOAD-IAM-01"
+        "WORKLOAD-IAM-01",
+        "STORAGE-PRIVATE-01"
       ]
     },
     {
@@ -1085,7 +1103,8 @@
         "resource.aws_s3_bucket_public_access_block.demo.0.ignore_public_acls"
       ],
       "matrix_ids": [
-        "WORKLOAD-IAM-01"
+        "WORKLOAD-IAM-01",
+        "STORAGE-PRIVATE-01"
       ]
     },
     {
@@ -1094,7 +1113,8 @@
         "resource.aws_s3_bucket_public_access_block.demo.0.restrict_public_buckets"
       ],
       "matrix_ids": [
-        "WORKLOAD-IAM-01"
+        "WORKLOAD-IAM-01",
+        "STORAGE-PRIVATE-01"
       ]
     },
     {
@@ -1704,7 +1724,8 @@
         "IMAGE-01",
         "DEPLOY-RBAC-01",
         "WORKLOAD-IAM-01",
-        "NETWORK-01"
+        "NETWORK-01",
+        "STORAGE-PRIVATE-01"
       ]
     },
     {
@@ -1745,6 +1766,60 @@
         "DEPLOY-RBAC-01",
         "WORKLOAD-IAM-01",
         "NETWORK-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket.practice_logs.0.bucket_prefix"
+      ],
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.practice_logs.0.block_public_acls"
+      ],
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.practice_logs.0.block_public_policy"
+      ],
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.practice_logs.0.bucket"
+      ],
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.practice_logs.0.ignore_public_acls"
+      ],
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ]
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol_prefixes": [
+        "resource.aws_s3_bucket_public_access_block.practice_logs.0.restrict_public_buckets"
+      ],
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
       ]
     }
   ]

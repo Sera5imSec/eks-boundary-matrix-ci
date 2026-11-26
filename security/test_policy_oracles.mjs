@@ -3,6 +3,57 @@ import assert from 'node:assert/strict';
 import { evaluate } from './matrix_oracles.mjs';
 import fs from 'node:fs';
 import YAML from 'yaml';
+import { runCases } from './matrix_cases.mjs';
+
+function storageFixture() {
+  const resources = ['demo', 'practice_logs'].flatMap(name => [
+    { address: 'aws_s3_bucket.' + name, mode: 'managed', type: 'aws_s3_bucket', values: { id: 'fixture-' + name } },
+    { address: 'aws_s3_bucket_public_access_block.' + name, mode: 'managed', type: 'aws_s3_bucket_public_access_block',
+      values: { bucket: 'fixture-' + name, block_public_acls: true, block_public_policy: true,
+        ignore_public_acls: true, restrict_public_buckets: true } }
+  ]);
+  return { terraform: { resources } };
+}
+
+test('private storage scenarios check both buckets and reject missing, disabled and misdirected restrictions', () => {
+  const catalog = JSON.parse(fs.readFileSync(new URL('./matrices/catalog.json', import.meta.url), 'utf8'));
+  const result = runCases(catalog, ['STORAGE-PRIVATE-01'], storageFixture());
+  assert.equal(result.matrices.length, 1);
+  assert.equal(result.matrices[0].control.verdict, 'PASS');
+  assert.equal(result.matrices[0].cases.length, 4);
+  assert.ok(result.matrices[0].cases.every(row => row.status === 'PASS'));
+});
+
+test('a protected demo bucket cannot hide an unprotected additional bucket', () => {
+  const evidence = storageFixture();
+  evidence.terraform.resources = evidence.terraform.resources.filter(row => row.address !== 'aws_s3_bucket_public_access_block.practice_logs');
+  const result = evaluate('STORAGE-PRIVATE-01', evidence);
+  assert.equal(result.verdict, 'FAIL');
+  assert.ok(result.checks.some(row => !row.ok && row.rule.startsWith('aws_s3_bucket.practice_logs')));
+});
+
+test('every S3 public access flag is enforced on the additional bucket', () => {
+  for (const flag of ['block_public_acls', 'block_public_policy', 'ignore_public_acls', 'restrict_public_buckets']) {
+    const evidence = storageFixture();
+    evidence.terraform.resources.find(row => row.address === 'aws_s3_bucket_public_access_block.practice_logs').values[flag] = false;
+    assert.equal(evaluate('STORAGE-PRIVATE-01', evidence).verdict, 'FAIL', flag);
+  }
+});
+
+test('a restriction attached to another bucket does not protect the additional bucket', () => {
+  const evidence = storageFixture();
+  evidence.terraform.resources.find(row => row.address === 'aws_s3_bucket_public_access_block.practice_logs').values.bucket = 'fixture-demo';
+  assert.equal(evaluate('STORAGE-PRIVATE-01', evidence).verdict, 'FAIL');
+});
+
+test('unknown storage settings and indistinguishable mock identities require review', () => {
+  const unknown = storageFixture();
+  delete unknown.terraform.resources.find(row => row.address === 'aws_s3_bucket_public_access_block.practice_logs').values.block_public_policy;
+  assert.equal(evaluate('STORAGE-PRIVATE-01', unknown).verdict, 'REVIEW');
+  const duplicate = storageFixture();
+  duplicate.terraform.resources.find(row => row.address === 'aws_s3_bucket.practice_logs').values.id = 'fixture-demo';
+  assert.equal(evaluate('STORAGE-PRIVATE-01', duplicate).verdict, 'REVIEW');
+});
 
 function workloadFixture() {
   const issuer = 'oidc.eks.us-west-2.amazonaws.com/id/FIXTURE';

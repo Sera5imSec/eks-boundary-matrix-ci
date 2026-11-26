@@ -364,6 +364,26 @@ const checks = {
     }
     return { group: 'matrix-deployer', namespace: evidence.policy.namespace };
   },
+  'STORAGE-PRIVATE-01'(evidence, expect) {
+    const buckets = managed(evidence, 'aws_s3_bucket');
+    const identities = buckets.map(row => known(row.values?.id, row.address + ' bucket ID'));
+    if (identities.some(id => typeof id !== 'string' || !id.length) || new Set(identities).size !== identities.length) {
+      throw new IncompleteEvidence('S3 bucket identities must be resolved and distinct');
+    }
+    const blocks = managed(evidence, 'aws_s3_bucket_public_access_block').map(row => ({
+      ...row, bucket: known(row.values?.bucket, row.address + ' target bucket')
+    }));
+    expect(buckets.length > 0, 'private storage has declared managed buckets');
+    for (const [index, bucket] of buckets.entries()) {
+      const matches = blocks.filter(row => row.bucket === identities[index]);
+      expect(matches.length === 1, bucket.address + ' has exactly one explicit public access block targeting its own ID');
+      if (matches.length !== 1) continue;
+      for (const flag of ['block_public_acls', 'block_public_policy', 'ignore_public_acls', 'restrict_public_buckets']) {
+        expect(known(matches[0].values[flag], bucket.address + ' ' + flag) === true, bucket.address + ' retains ' + flag);
+      }
+    }
+    return { buckets: buckets.map(row => row.address), bucket_ids: identities };
+  },
   'WORKLOAD-IAM-01'(evidence, expect) {
     const role = resource(evidence, 'aws_iam_role.workload');
     const provider = managed(evidence, 'aws_iam_openid_connect_provider').find(row => row.address.startsWith('module.eks.'));

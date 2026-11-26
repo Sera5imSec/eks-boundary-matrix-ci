@@ -18,9 +18,9 @@ function temporarySource() {
   return directory;
 }
 
-test('all 13 matrix mutations change only one actual source file and retain valid source syntax', () => {
+test('all 14 matrix mutations change only one actual source file and retain valid source syntax', () => {
   validateSourceMutations(catalog);
-  assert.equal(sourceMutations.length, 13);
+  assert.equal(sourceMutations.length, 14);
   const before = snapshotSource(ROOT);
   for (const mutation of sourceMutations) {
     const directory = temporarySource();

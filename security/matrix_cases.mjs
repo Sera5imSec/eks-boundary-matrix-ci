@@ -84,6 +84,13 @@ const negativeChanges = {
   'DEPLOY-RBAC-01-CLUSTER-N': evidence => {
     evidence.manifests.find(row => row.kind === 'RoleBinding').kind = 'ClusterRoleBinding';
   },
+  'STORAGE-PRIVATE-01-MISSING-N': evidence => {
+    evidence.terraform.resources = evidence.terraform.resources.filter(row => row.address !== 'aws_s3_bucket_public_access_block.practice_logs');
+  },
+  'STORAGE-PRIVATE-01-FLAG-N': evidence => { resource(evidence, 'aws_s3_bucket_public_access_block.practice_logs').block_public_policy = false; },
+  'STORAGE-PRIVATE-01-TARGET-N': evidence => {
+    resource(evidence, 'aws_s3_bucket_public_access_block.practice_logs').bucket = resource(evidence, 'aws_s3_bucket.demo').id;
+  },
   'WORKLOAD-IAM-01-ACCOUNT-N': evidence => {
     changeTrust(evidence, 'aws_iam_role.workload', policy => {
       const key = Object.keys(policy.Statement[0].Condition.StringEquals).find(name => name.endsWith(':sub'));

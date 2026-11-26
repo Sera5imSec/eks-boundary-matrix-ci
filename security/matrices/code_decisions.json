@@ -6,8 +6,13 @@
       "symbol": "file",
       "fingerprint": "5954ab7519ffc49c7b27ff5c4b94367503fa72f23acc2a74b30d88823a1eed63",
       "decision": "existing_rule",
-      "matrix_ids": ["CI-DEPLOY-01"],
-      "variant_ids": ["CI-DEPLOY-01-LOCAL-N", "CI-DEPLOY-01-RELEASE-P"],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-LOCAL-N",
+        "CI-DEPLOY-01-RELEASE-P"
+      ],
       "reason": "Explicit local Docker integration checks cover installation, update, artifact identity rejection and restoration after a failed promotion; they run separately from ordinary PR checks."
     },
     {
@@ -15,8 +20,13 @@
       "symbol": "workflow.jobs.delivery-policy",
       "fingerprint": "beb94de6ee591dfca917ef7f226e281cdea56243cc5c2625df2b98b693564e81",
       "decision": "add_variant",
-      "matrix_ids": ["CI-DEPLOY-01"],
-      "variant_ids": ["CI-DEPLOY-01-LOCAL-N", "CI-DEPLOY-01-RELEASE-P"],
+      "matrix_ids": [
+        "CI-DEPLOY-01"
+      ],
+      "variant_ids": [
+        "CI-DEPLOY-01-LOCAL-N",
+        "CI-DEPLOY-01-RELEASE-P"
+      ],
       "reason": "PR and main CI run the admission tests for the new exact-revision local delivery boundary."
     },
     {
@@ -3939,8 +3949,8 @@
     {
       "path": "patterns/fully-private-cluster/tests/matrix.tftest.hcl",
       "symbol": "file",
-      "fingerprint": "40ba378c0e5d38fd5ef37fd4bb30337be7f1d6b24859ffe7393d51dd7d57836e",
-      "decision": "existing_rule",
+      "fingerprint": "14a632cf222c7bf431d699d39426cd6c7b7aa5d8c2585d859ac37bae57d01c41",
+      "decision": "new_matrix",
       "matrix_ids": [
         "PLATFORM-BASELINE-01",
         "CLUSTER-ACCESS-01",
@@ -3953,7 +3963,8 @@
         "IMAGE-01",
         "DEPLOY-RBAC-01",
         "WORKLOAD-IAM-01",
-        "NETWORK-01"
+        "NETWORK-01",
+        "STORAGE-PRIVATE-01"
       ],
       "variant_ids": [
         "PLATFORM-BASELINE-01-READY-P",
@@ -3993,9 +4004,13 @@
         "WORKLOAD-IAM-01-PUBLIC-STORAGE-N",
         "WORKLOAD-IAM-01-STS-N",
         "NETWORK-01-INTERNAL-P",
-        "NETWORK-01-PUBLIC-N"
+        "NETWORK-01-PUBLIC-N",
+        "STORAGE-PRIVATE-01-BLOCKED-P",
+        "STORAGE-PRIVATE-01-MISSING-N",
+        "STORAGE-PRIVATE-01-FLAG-N",
+        "STORAGE-PRIVATE-01-TARGET-N"
       ],
-      "reason": "Initial source review ties this configuration unit to the named obligations and executable scenarios. A changed fingerprint requires a fresh decision."
+      "reason": "Retains the original Terraform mocks and gives the additional log bucket a distinct ID and ARN. STORAGE-PRIVATE-01 must distinguish its protection from the demo bucket. All existing Terraform-backed controls remain selected and unchanged."
     },
     {
       "path": "patterns/fully-private-cluster/versions.tf",
@@ -4183,6 +4198,102 @@
         "NETWORK-01-PUBLIC-N"
       ],
       "reason": "The matrix job now emits source coverage handoff reports before stopping. Existing matrix/scenario coverage remains required; source-review regression tests verify unresolved units stop before runtime. The workflow retains read-only PR permissions and manual-only source sensitivity."
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol": "resource.aws_s3_bucket.practice_logs.0.bucket_prefix",
+      "fingerprint": "ee0044961631a334dba5dc30e2f08f2dd9f47eced111168c76b2a7e2f5506397",
+      "decision": "new_matrix",
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ],
+      "variant_ids": [
+        "STORAGE-PRIVATE-01-BLOCKED-P",
+        "STORAGE-PRIVATE-01-MISSING-N",
+        "STORAGE-PRIVATE-01-FLAG-N",
+        "STORAGE-PRIVATE-01-TARGET-N"
+      ],
+      "reason": "PR #4 introduces independent log storage; WORKLOAD-IAM-01 only inspects the demo storage. STORAGE-PRIVATE-01 enumerates all managed buckets, checks the exact protection target and all four public access flags; its missing, disabled and misdirected log-bucket fixtures must be rejected."
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol": "resource.aws_s3_bucket_public_access_block.practice_logs.0.block_public_acls",
+      "fingerprint": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "decision": "new_matrix",
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ],
+      "variant_ids": [
+        "STORAGE-PRIVATE-01-BLOCKED-P",
+        "STORAGE-PRIVATE-01-MISSING-N",
+        "STORAGE-PRIVATE-01-FLAG-N",
+        "STORAGE-PRIVATE-01-TARGET-N"
+      ],
+      "reason": "PR #4 introduces independent log storage; WORKLOAD-IAM-01 only inspects the demo storage. STORAGE-PRIVATE-01 enumerates all managed buckets, checks the exact protection target and all four public access flags; its missing, disabled and misdirected log-bucket fixtures must be rejected."
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol": "resource.aws_s3_bucket_public_access_block.practice_logs.0.block_public_policy",
+      "fingerprint": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "decision": "new_matrix",
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ],
+      "variant_ids": [
+        "STORAGE-PRIVATE-01-BLOCKED-P",
+        "STORAGE-PRIVATE-01-MISSING-N",
+        "STORAGE-PRIVATE-01-FLAG-N",
+        "STORAGE-PRIVATE-01-TARGET-N"
+      ],
+      "reason": "PR #4 introduces independent log storage; WORKLOAD-IAM-01 only inspects the demo storage. STORAGE-PRIVATE-01 enumerates all managed buckets, checks the exact protection target and all four public access flags; its missing, disabled and misdirected log-bucket fixtures must be rejected."
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol": "resource.aws_s3_bucket_public_access_block.practice_logs.0.bucket",
+      "fingerprint": "a8265a52d790eb4f10ea20f1c6de8c1a5cd997142d3713c97ab0e5c48917dfc8",
+      "decision": "new_matrix",
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ],
+      "variant_ids": [
+        "STORAGE-PRIVATE-01-BLOCKED-P",
+        "STORAGE-PRIVATE-01-MISSING-N",
+        "STORAGE-PRIVATE-01-FLAG-N",
+        "STORAGE-PRIVATE-01-TARGET-N"
+      ],
+      "reason": "PR #4 introduces independent log storage; WORKLOAD-IAM-01 only inspects the demo storage. STORAGE-PRIVATE-01 enumerates all managed buckets, checks the exact protection target and all four public access flags; its missing, disabled and misdirected log-bucket fixtures must be rejected."
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol": "resource.aws_s3_bucket_public_access_block.practice_logs.0.ignore_public_acls",
+      "fingerprint": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "decision": "new_matrix",
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ],
+      "variant_ids": [
+        "STORAGE-PRIVATE-01-BLOCKED-P",
+        "STORAGE-PRIVATE-01-MISSING-N",
+        "STORAGE-PRIVATE-01-FLAG-N",
+        "STORAGE-PRIVATE-01-TARGET-N"
+      ],
+      "reason": "PR #4 introduces independent log storage; WORKLOAD-IAM-01 only inspects the demo storage. STORAGE-PRIVATE-01 enumerates all managed buckets, checks the exact protection target and all four public access flags; its missing, disabled and misdirected log-bucket fixtures must be rejected."
+    },
+    {
+      "path": "patterns/fully-private-cluster/delivery.tf",
+      "symbol": "resource.aws_s3_bucket_public_access_block.practice_logs.0.restrict_public_buckets",
+      "fingerprint": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "decision": "new_matrix",
+      "matrix_ids": [
+        "STORAGE-PRIVATE-01"
+      ],
+      "variant_ids": [
+        "STORAGE-PRIVATE-01-BLOCKED-P",
+        "STORAGE-PRIVATE-01-MISSING-N",
+        "STORAGE-PRIVATE-01-FLAG-N",
+        "STORAGE-PRIVATE-01-TARGET-N"
+      ],
+      "reason": "PR #4 introduces independent log storage; WORKLOAD-IAM-01 only inspects the demo storage. STORAGE-PRIVATE-01 enumerates all managed buckets, checks the exact protection target and all four public access flags; its missing, disabled and misdirected log-bucket fixtures must be rejected."
     }
   ]
 }

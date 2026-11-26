@@ -2,7 +2,7 @@
 
 The demonstration source code, matrix catalog, executable checks and GitHub Actions live in one repository. A matrix describes a security rule. An oracle checks that rule against collected evidence. CI connects a source change to the relevant matrices and records the result.
 
-The infrastructure stack is **Terraform → AWS VPC and EKS → Kubernetes**. Cloud application delivery is defined through **GitHub Actions → Docker → Amazon ECR → EKS**. The catalog currently contains **13 matrices and 42 scenarios**. The working local delivery path is described in [Local CD](LOCAL-CD.md).
+The infrastructure stack is **Terraform → AWS VPC and EKS → Kubernetes**. Cloud application delivery is defined through **GitHub Actions → Docker → Amazon ECR → EKS**. The catalog currently contains **14 matrices and 46 scenarios**. The working local delivery path is described in [Local CD](LOCAL-CD.md).
 
 ## 1. Project contents
 
@@ -220,7 +220,7 @@ runtime evidence.
 
 | Situation | Selected checks |
 | --- | --- |
-| Manual normal CI dispatch or `run --full` | All 13 matrices |
+| Manual normal CI dispatch or `run --full` | All 14 matrices |
 | No base commit on the first run | Full suite |
 | PR/push has a base commit and current decisions | Union of matrices from matching bindings and decisions for changed units |
 | Only the EKS endpoint public-access field changes | `CLUSTER-ACCESS-01`, provided other source files and decisions are unchanged |
@@ -271,7 +271,8 @@ The last column applies to the **manual** sensitivity run. Normal CI does not pe
 | `DEPLOY-RBAC-01` | 3 | Deployment is restricted to the namespace and allowed actions | Replace allowed Role actions with `*` |
 | `WORKLOAD-IAM-01` | 5 | Exact ServiceAccount/IRSA, access to its own object, read-only permissions, S3 public-access block and private regional STS | Add `s3:DeleteObject` to the application role |
 | `NETWORK-01` | 2 | Application uses an internal Service without public ingress | `ClusterIP` → `LoadBalancer` |
-| **Total** | **42** | **13 matrices** | **One source mutation per matrix** |
+| `STORAGE-PRIVATE-01` | 4 | Every declared S3 bucket has its own explicit public access block with all four flags enabled | Disable the additional log bucket public policy restriction |
+| **Total** | **46** | **14 matrices** | **One source mutation per matrix** |
 
 ## 8. Manual sensitivity checks
 
@@ -303,7 +304,7 @@ A successful manual workflow means all selected mutations returned **`DETECTED`*
 
 This check sends the changed copy directly to the same oracle through fresh evidence. Coverage decisions are deliberately not updated: it tests rule sensitivity separately from the normal gate's rejection of an unknown fingerprint.
 
-**Negative data fixtures in normal scenarios and source mutations are separate mechanisms.** The former run in normal CI. The latter run in a separate manual workflow. Selecting a scenario ID in the manual workflow runs the representative source mutation for its parent matrix; there is no individual source mutation for each of the 42 scenarios.
+**Negative data fixtures in normal scenarios and source mutations are separate mechanisms.** The former run in normal CI. The latter run in a separate manual workflow. Selecting a scenario ID in the manual workflow runs the representative source mutation for its parent matrix; there is no individual source mutation for each of the 46 scenarios.
 
 ## 9. Running the checks
 

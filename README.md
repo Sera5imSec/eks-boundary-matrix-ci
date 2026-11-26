@@ -12,7 +12,7 @@ for Terraform. The source is pinned to upstream commit
 `fc40e64615785b3dc4db88e57c45a6687ca026b5`.
 
 The demonstration connects Terraform, a Docker image, Amazon ECR, EKS/Kubernetes
-and GitHub Actions through one catalog with 13 matrices and 42 scenarios.
+and GitHub Actions through one catalog with 14 matrices and 46 scenarios.
 The catalog covers private cluster networking, registry and workload permissions,
 deployment scope, image identity, build artifact contents and the cluster baseline.
 
@@ -115,7 +115,7 @@ push and scheduled CI do not launch this source-mutation suite. The command also
 rejects automatic GitHub Actions event contexts. Its source-mutating self-tests
 also run in this separate manual workflow, outside the normal PR test command.
 
-Each of the 13 matrices has one representative source edit. The runner builds a
+Each of the 14 matrices has one representative source edit. The runner builds a
 passing control from the current source, copies source files to a disposable
 directory, changes exactly one file, and prepares evidence again. Terraform edits
 rerun formatting, initialization, validation and mocked evaluation. Kubernetes
@@ -137,7 +137,7 @@ evidence and a changed original checkout fail the job. A build error or `REVIEW`
 is never counted as a detection. An unknown input ID produces an input error and
 exit code 2. Temporary directories are removed; source hashes, edits, per-matrix
 observations and preparation evidence remain under `artifacts/source-sensitivity/`.
-This checks one source edit per matrix, rather than all 41 scenario variants.
+This checks one source edit per matrix, rather than all 46 scenario variants.
 AWS and Kubernetes are not deployed by this workflow.
 
 ## Manual release setup
